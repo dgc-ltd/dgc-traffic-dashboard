@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DGC Group — Traffic Dashboard</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --success:        #006300;
+
+    --site-dgc:       #2a78d6; /* blue */
+    --site-manx:      #eb6834; /* orange */
+    --site-silverdale:#1baf7a; /* aqua */
+
+    --ch-direct:      #2a78d6;
+    --ch-organic:     #1baf7a;
+    --ch-paid:        #eda100;
+    --ch-referral:    #4a3aa7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --success:        #0ca30c;
+
+      --site-dgc:       #3987e5;
+      --site-manx:      #d95926;
+      --site-silverdale:#199e70;
+
+      --ch-direct:      #3987e5;
+      --ch-organic:     #199e70;
+      --ch-paid:        #c98500;
+      --ch-referral:    #9085e9;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 20px 16px 60px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header { margin-bottom: 6px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .subhead { color: var(--text-secondary); font-size: 13px; margin: 0; }
+
+  .demo-banner {
+    margin: 16px 0 24px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-1);
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .demo-banner strong { color: var(--text-primary); }
+  .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); flex: none; }
+
+  .range-row {
+    display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .range-btn {
+    font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary);
+    cursor: pointer;
+  }
+  .range-btn[aria-pressed="true"] {
+    background: var(--text-primary); color: var(--page); border-color: var(--text-primary);
+  }
+
+  .sites {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 860px) { .sites { grid-template-columns: 1fr; } }
+
+  .site-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px 14px;
+    cursor: pointer;
+  }
+  .site-card-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  }
+  .site-swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .site-name { font-weight: 600; font-size: 14px; }
+  .site-domain { color: var(--text-muted); font-size: 12px; margin-left: auto; }
+
+  .stat-row { display: flex; gap: 22px; margin-bottom: 10px; }
+  .stat-tile .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); }
+  .stat-tile .stat-value { font-size: 28px; font-weight: 600; line-height: 1.15; }
+  .stat-tile .stat-delta { font-size: 12px; color: var(--success); font-variant-numeric: tabular-nums; }
+  .stat-tile .stat-delta.neg { color: var(--text-muted); }
+
+  svg.spark { width: 100%; height: 40px; display: block; margin-top: 6px; }
+  .spark-line { fill: none; stroke-width: 2; }
+  .spark-area { opacity: .12; }
+
+  .expand-hint { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+
+  /* Expanded detail */
+  .detail {
+    display: none;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px 20px;
+    margin-bottom: 28px;
+  }
+  .detail.open { display: block; }
+  .detail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .detail-head h2 { font-size: 16px; margin: 0; }
+  .close-btn {
+    font: inherit; font-size: 13px; border: 1px solid var(--border); background: transparent;
+    color: var(--text-secondary); border-radius: 8px; padding: 5px 10px; cursor: pointer;
+  }
+
+  .detail-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; }
+  @media (max-width: 780px) { .detail-grid { grid-template-columns: 1fr; } }
+
+  .panel-title { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin-bottom: 10px; }
+
+  /* Channel bar chart */
+  .chan-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+  .chan-label { width: 96px; flex: none; color: var(--text-secondary); }
+  .chan-track { flex: 1; height: 10px; background: var(--gridline); border-radius: 4px; overflow: hidden; }
+  .chan-fill { display: block; height: 100%; border-radius: 4px; }
+  .chan-value { width: 40px; flex: none; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  .legend-note { margin-top: 4px; font-size: 12px; color: var(--text-muted); }
+
+  /* Search queries */
+  .query-list { list-style: none; margin: 0; padding: 0; }
+  .query-list li {
+    display: flex; justify-content: space-between; gap: 10px;
+    padding: 7px 0; border-bottom: 1px solid var(--gridline); font-size: 13px;
+  }
+  .query-list li:last-child { border-bottom: none; }
+  .query-term { color: var(--text-primary); }
+  .query-count { color: var(--text-muted); font-variant-numeric: tabular-nums; flex: none; }
+
+  /* Sessions table */
+  table.sessions { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  table.sessions th {
+    text-align: left; font-weight: 500; font-size: 11px; text-transform: uppercase;
+    letter-spacing: .03em; color: var(--text-muted); padding: 6px 8px; border-bottom: 1px solid var(--baseline);
+  }
+  table.sessions td { padding: 8px; border-bottom: 1px solid var(--gridline); vertical-align: top; }
+  table.sessions tr:last-child td { border-bottom: none; }
+  .pill {
+    display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    background: var(--gridline); color: var(--text-secondary);
+  }
+  .pill.new { background: color-mix(in srgb, var(--ch-organic) 18%, var(--surface-1)); color: var(--ch-organic); }
+  .source-cell { color: var(--text-secondary); }
+
+  footer { margin-top: 30px; font-size: 12px; color: var(--text-muted); }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>DGC Group — Traffic Dashboard</h1>
+    <p class="subhead">DGC Ltd · Manx Drain Solutions · Silverdale Limited — one page, three sites.</p>
+  </header>
+
+  <div class="demo-banner">
+    <span class="dot-live"></span>
+    <span><strong>Placeholder data.</strong> All three sites now have Analytics installed and running — real numbers will replace this once API access is connected (blocked on enabling 2-step verification on the Google account; see note from Claude).</span>
+  </div>
+
+  <div class="range-row" role="group" aria-label="Date range">
+    <button class="range-btn" aria-pressed="false" data-range="today">Today</button>
+    <button class="range-btn" aria-pressed="true" data-range="7d">Last 7 days</button>
+    <button class="range-btn" aria-pressed="false" data-range="30d">Last 30 days</button>
+  </div>
+
+  <section class="sites" id="siteCards"></section>
+
+  <section class="detail" id="detailPanel">
+    <div class="detail-head">
+      <h2 id="detailTitle">Site detail</h2>
+      <button class="close-btn" id="closeDetail">Close</button>
+    </div>
+    <div class="detail-grid">
+      <div>
+        <div class="panel-title">Traffic sources</div>
+        <div id="channelBars"></div>
+        <div class="legend-note">Share of sessions by how people arrived — direct (typed URL / bookmark), organic search, paid search (Google Ads), referral (linked from another site).</div>
+
+        <div class="panel-title" style="margin-top:22px;">Top search terms</div>
+        <ul class="query-list" id="queryList"></ul>
+      </div>
+      <div>
+        <div class="panel-title">Recent sessions</div>
+        <table class="sessions">
+          <thead>
+            <tr><th>Arrived via</th><th>Landing page</th><th>Pages</th><th>Time on site</th><th>Exit page</th><th>Visitor</th></tr>
+          </thead>
+          <tbody id="sessionRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Data shape mirrors the Google Analytics 4 Data API + Search Console API (sessions, channel group, landing/exit page, engagement time, new-vs-returning). No raw IP addresses are collected or shown anywhere — Google does not expose them, and Isle of Man data protection law treats them as personal data.
+  </footer>
+
+</div>
+
+<script>
+// ---- Mock data, shaped exactly like the real GA4/Search Console API responses will be ----
+const SITES = [
+  {
+    id: 'dgc', name: 'DGC Ltd', domain: 'dgc.im', color: 'var(--site-dgc)',
+    today: 7, week: 41, weekDelta: '+12%',
+    spark: [3,5,2,6,4,9,7],
+    channels: [
+      { label: 'Direct', value: 0.52, color: 'var(--ch-direct)' },
+      { label: 'Organic search', value: 0.21, color: 'var(--ch-organic)' },
+      { label: 'Paid search', value: 0.19, color: 'var(--ch-paid)' },
+      { label: 'Referral', value: 0.08, color: 'var(--ch-referral)' },
+    ],
+    queries: [
+      { term: 'drainage contractor isle of man', count: 4 },
+      { term: 'groundworks isle of man', count: 3 },
+      { term: 'dgc ltd', count: 2 },
+      { term: 'civil engineering iom', count: 1 },
+    ],
+    sessions: [
+      { source: 'Google Ads', landing: '/', pages: 3, duration: '2m 40s', exit: '/contact', visitor: 'returning' },
+      { source: 'Direct', landing: '/services', pages: 5, duration: '4m 05s', exit: '/services/drainage', visitor: 'new' },
+      { source: 'Organic search', landing: '/blog', pages: 2, duration: '1m 12s', exit: '/blog', visitor: 'new' },
+    ],
+  },
+  {
+    id: 'manx', name: 'Manx Drain Solutions', domain: 'manxdrainsolutions.com', color: 'var(--site-manx)',
+    today: 3, week: 22, weekDelta: '+6%',
+    spark: [2,4,1,3,5,4,3],
+    channels: [
+      { label: 'Direct', value: 0.45, color: 'var(--ch-direct)' },
+      { label: 'Organic search', value: 0.15, color: 'var(--ch-organic)' },
+      { label: 'Paid search', value: 0.34, color: 'var(--ch-paid)' },
+      { label: 'Referral', value: 0.06, color: 'var(--ch-referral)' },
+    ],
+    queries: [
+      { term: 'blocked drain isle of man', count: 3 },
+      { term: 'septic tank maintenance iom', count: 2 },
+      { term: 'cctv drain survey', count: 1 },
+    ],
+    sessions: [
+      { source: 'Google Ads', landing: '/', pages: 1, duration: '0m 45s', exit: '/', visitor: 'new' },
+      { source: 'Direct', landing: '/', pages: 4, duration: '3m 20s', exit: '/contact-us', visitor: 'returning' },
+    ],
+  },
+  {
+    id: 'silverdale', name: 'Silverdale Limited', domain: 'silverdale.im', color: 'var(--site-silverdale)',
+    today: 3, week: 78, weekDelta: '+290%',
+    spark: [6,9,19,26,12,7,3],
+    channels: [
+      { label: 'Direct', value: 0.56, color: 'var(--ch-direct)' },
+      { label: 'Organic search', value: 0.125, color: 'var(--ch-organic)' },
+      { label: 'Paid search', value: 0.30, color: 'var(--ch-paid)' },
+      { label: 'Referral', value: 0.015, color: 'var(--ch-referral)' },
+    ],
+    queries: [
+      { term: 'silverdale development', count: 1 },
+      { term: 'building control iom', count: 9 },
+      { term: 'ballaugh', count: 1 },
+    ],
+    sessions: [
+      { source: 'Direct', landing: '/', pages: 2, duration: '1m 05s', exit: '/about', visitor: 'new' },
+      { source: 'Organic search', landing: '/understanding-building-regulations-on-the-isle-of-man', pages: 1, duration: '3m 40s', exit: 'same page', visitor: 'new' },
+    ],
+  },
+];
+
+function sparkPath(values, w, h) {
+  const max = Math.max(...values), min = 0;
+  const step = w / (values.length - 1);
+  const pts = values.map((v, i) => {
+    const x = i * step;
+    const y = h - ((v - min) / (max - min || 1)) * (h - 4) - 2;
+    return [x, y];
+  });
+  const line = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  const area = line + ` L${w},${h} L0,${h} Z`;
+  return { line, area };
+}
+
+function renderCards() {
+  const el = document.getElementById('siteCards');
+  el.innerHTML = SITES.map(s => {
+    const { line, area } = sparkPath(s.spark, 280, 40);
+    return `
+    <div class="site-card" data-site="${s.id}" tabindex="0" role="button" aria-expanded="false">
+      <div class="site-card-head">
+        <span class="site-swatch" style="background:${s.color}"></span>
+        <span class="site-name">${s.name}</span>
+        <span class="site-domain">${s.domain}</span>
+      </div>
+      <div class="stat-row">
+        <div class="stat-tile">
+          <div class="stat-label">Today</div>
+          <div class="stat-value">${s.today}</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">This week</div>
+          <div class="stat-value">${s.week}</div>
+          <div class="stat-delta">${s.weekDelta} vs prior week</div>
+        </div>
+      </div>
+      <svg class="spark" viewBox="0 0 280 40" preserveAspectRatio="none">
+        <path class="spark-area" d="${area}" fill="${s.color}"></path>
+        <path class="spark-line" d="${line}" stroke="${s.color}"></path>
+      </svg>
+      <div class="expand-hint">Click to see search terms, traffic sources and sessions →</div>
+    </div>`;
+  }).join('');
+
+  el.querySelectorAll('.site-card').forEach(card => {
+    card.addEventListener('click', () => openDetail(card.dataset.site));
+    card.addEventListener('keypress', e => { if (e.key === 'Enter') openDetail(card.dataset.site); });
+  });
+}
+
+function openDetail(siteId) {
+  const s = SITES.find(x => x.id === siteId);
+  if (!s) return;
+  document.getElementById('detailTitle').textContent = s.name + ' — detail';
+
+  document.getElementById('channelBars').innerHTML = s.channels.map(c => `
+    <div class="chan-row">
+      <span class="chan-label">${c.label}</span>
+      <span class="chan-track"><span class="chan-fill" style="width:${(c.value*100).toFixed(0)}%;background:${c.color}"></span></span>
+      <span class="chan-value">${(c.value*100).toFixed(0)}%</span>
+    </div>`).join('');
+
+  document.getElementById('queryList').innerHTML = s.queries.map(q => `
+    <li><span class="query-term">${q.term}</span><span class="query-count">${q.count}</span></li>`).join('');
+
+  document.getElementById('sessionRows').innerHTML = s.sessions.map(r => `
+    <tr>
+      <td class="source-cell">${r.source}</td>
+      <td>${r.landing}</td>
+      <td>${r.pages}</td>
+      <td>${r.duration}</td>
+      <td>${r.exit}</td>
+      <td><span class="pill ${r.visitor === 'new' ? 'new' : ''}">${r.visitor}</span></td>
+    </tr>`).join('');
+
+  document.getElementById('detailPanel').classList.add('open');
+  document.getElementById('detailPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+document.getElementById('closeDetail').addEventListener('click', () => {
+  document.getElementById('detailPanel').classList.remove('open');
+});
+
+document.querySelectorAll('.range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.range-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    btn.setAttribute('aria-pressed', 'true');
+    // Range switching will re-fetch from the real API once connected.
+  });
+});
+
+renderCards();
+</script>
+</body>
+</html>
