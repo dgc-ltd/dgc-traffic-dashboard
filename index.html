@@ -294,16 +294,19 @@ let siteState = {}; // id -> { propertyId, measurementId, data, error, scLoading
 // ---------------------------------------------------------------------------
 function saveToken(token, expiresInSec) {
   const expiresAt = Date.now() + (expiresInSec * 1000) - 60000; // 1 min safety margin
-  try { sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify({ token, expiresAt })); } catch (e) {}
+  try { localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify({ token, expiresAt })); } catch (e) {}
 }
 function loadStoredToken() {
   try {
-    const raw = sessionStorage.getItem(TOKEN_STORAGE_KEY);
+    const raw = localStorage.getItem(TOKEN_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (parsed.expiresAt > Date.now()) return parsed.token;
   } catch (e) {}
   return null;
+}
+function clearStoredToken() {
+  try { localStorage.removeItem(TOKEN_STORAGE_KEY); } catch (e) {}
 }
 
 function setStatus(kind, html) {
@@ -322,6 +325,11 @@ function initGoogle() {
     scope: SCOPES,
     callback: (resp) => {
       if (resp.error) {
+        // Silent attempt failed (needs a real click) — fall back to the visible button quietly.
+        if (resp.error === 'interaction_required' || resp.error === 'access_denied' || resp.error === 'immediate_failed') {
+          setStatus('muted', 'Not connected yet — click <strong>Connect Google account</strong> above to sign back in (happens roughly once a week while this app is in Google\'s testing mode).');
+          return;
+        }
         setStatus('err', `Sign-in failed: <strong>${resp.error}</strong>. Try Connect again.`);
         return;
       }
@@ -335,6 +343,10 @@ function initGoogle() {
   if (stored) {
     accessToken = stored;
     onSignedIn();
+  } else {
+    // Try a silent, no-click re-auth first (works if this browser still has an active Google
+    // session and has approved this app before) — only falls back to a visible prompt if that fails.
+    tokenClient.requestAccessToken({ prompt: '' });
   }
 
   document.getElementById('signInBtn').addEventListener('click', () => {
@@ -346,7 +358,10 @@ function onSignedIn() {
   document.getElementById('authBox').innerHTML = `
     <button class="btn secondary" id="refreshBtn">Refresh data</button>
     <div class="signed-in-as">Connected to Google Analytics &amp; Search Console</div>`;
-  document.getElementById('refreshBtn').addEventListener('click', () => loadAllSites(true));
+  document.getElementById('refreshBtn').addEventListener('click', () => {
+    if (!accessToken) { tokenClient.requestAccessToken({ prompt: '' }); return; }
+    loadAllSites(true);
+  });
   setStatus('live', 'Connected. Loading real data from Google Analytics…');
   loadAllSites(false);
 }
@@ -361,8 +376,8 @@ async function gfetch(url, opts) {
   });
   if (res.status === 401) {
     accessToken = null;
-    try { sessionStorage.removeItem(TOKEN_STORAGE_KEY); } catch (e) {}
-    throw new Error('Google sign-in expired — click Connect Google account again.');
+    clearStoredToken();
+    throw new Error('Google sign-in expired — click Connect Google account again (or Refresh, it may sort itself out silently).');
   }
   const body = await res.json();
   if (!res.ok) {
