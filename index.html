@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DGC Group — Traffic Dashboard</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root {
     color-scheme: light;
@@ -16,6 +17,7 @@
     --baseline:       #c3c2b7;
     --border:         rgba(11,11,11,0.10);
     --success:        #006300;
+    --critical:       #d03b3b;
 
     --site-dgc:       #2a78d6; /* blue */
     --site-manx:      #eb6834; /* orange */
@@ -25,6 +27,7 @@
     --ch-organic:     #1baf7a;
     --ch-paid:        #eda100;
     --ch-referral:    #4a3aa7;
+    --ch-other:       #898781;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -38,6 +41,7 @@
       --baseline:       #383835;
       --border:         rgba(255,255,255,0.10);
       --success:        #0ca30c;
+      --critical:       #e66767;
 
       --site-dgc:       #3987e5;
       --site-manx:      #d95926;
@@ -47,6 +51,7 @@
       --ch-organic:     #199e70;
       --ch-paid:        #c98500;
       --ch-referral:    #9085e9;
+      --ch-other:       #898781;
     }
   }
   * { box-sizing: border-box; }
@@ -59,11 +64,21 @@
   }
   .wrap { max-width: 1180px; margin: 0 auto; }
 
-  header { margin-bottom: 6px; }
+  header { margin-bottom: 6px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   h1 { font-size: 22px; margin: 0 0 4px; }
   .subhead { color: var(--text-secondary); font-size: 13px; margin: 0; }
 
-  .demo-banner {
+  .auth-box { text-align: right; }
+  .btn {
+    font: inherit; font-size: 13px; padding: 8px 14px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--text-primary); color: var(--page);
+    cursor: pointer;
+  }
+  .btn.secondary { background: var(--surface-1); color: var(--text-secondary); }
+  .signed-in-as { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  .signed-in-as a { color: inherit; }
+
+  .status-banner {
     margin: 16px 0 24px;
     padding: 12px 16px;
     border: 1px solid var(--border);
@@ -75,11 +90,15 @@
     align-items: center;
     gap: 10px;
   }
-  .demo-banner strong { color: var(--text-primary); }
-  .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); flex: none; }
+  .status-banner strong { color: var(--text-primary); }
+  .status-banner.err { border-color: color-mix(in srgb, var(--critical) 40%, var(--border)); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.muted { background: var(--text-muted); }
+  .dot.live { background: var(--success); }
+  .dot.err { background: var(--critical); }
 
   .range-row {
-    display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;
+    display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; align-items: center;
   }
   .range-btn {
     font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px;
@@ -89,6 +108,8 @@
   .range-btn[aria-pressed="true"] {
     background: var(--text-primary); color: var(--page); border-color: var(--text-primary);
   }
+  .range-btn:disabled { opacity: .5; cursor: default; }
+  .last-updated { margin-left: auto; font-size: 12px; color: var(--text-muted); }
 
   .sites {
     display: grid;
@@ -104,6 +125,7 @@
     border-radius: 14px;
     padding: 16px 18px 14px;
     cursor: pointer;
+    min-height: 150px;
   }
   .site-card-head {
     display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
@@ -123,6 +145,10 @@
   .spark-area { opacity: .12; }
 
   .expand-hint { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+  .card-note { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+  .card-note.err { color: var(--critical); }
+
+  .skeleton { opacity: .5; }
 
   /* Expanded detail */
   .detail {
@@ -164,7 +190,7 @@
   .query-term { color: var(--text-primary); }
   .query-count { color: var(--text-muted); font-variant-numeric: tabular-nums; flex: none; }
 
-  /* Sessions table */
+  /* Landing pages table */
   table.sessions { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
   table.sessions th {
     text-align: left; font-weight: 500; font-size: 11px; text-transform: uppercase;
@@ -178,6 +204,7 @@
   }
   .pill.new { background: color-mix(in srgb, var(--ch-organic) 18%, var(--surface-1)); color: var(--ch-organic); }
   .source-cell { color: var(--text-secondary); }
+  .empty-note { font-size: 13px; color: var(--text-muted); padding: 8px 0; }
 
   footer { margin-top: 30px; font-size: 12px; color: var(--text-muted); }
   footer a { color: inherit; }
@@ -187,19 +214,25 @@
 <div class="wrap">
 
   <header>
-    <h1>DGC Group — Traffic Dashboard</h1>
-    <p class="subhead">DGC Ltd · Manx Drain Solutions · Silverdale Limited — one page, three sites.</p>
+    <div>
+      <h1>DGC Group — Traffic Dashboard</h1>
+      <p class="subhead">DGC Ltd · Manx Drain Solutions · Silverdale Limited — one page, three sites.</p>
+    </div>
+    <div class="auth-box" id="authBox">
+      <button class="btn" id="signInBtn">Connect Google account</button>
+    </div>
   </header>
 
-  <div class="demo-banner">
-    <span class="dot-live"></span>
-    <span><strong>Placeholder data.</strong> All three sites now have Analytics installed and running — real numbers will replace this once API access is connected (blocked on enabling 2-step verification on the Google account; see note from Claude).</span>
+  <div class="status-banner" id="statusBanner">
+    <span class="dot muted"></span>
+    <span>Not connected yet — click <strong>Connect Google account</strong> above, sign in as usiom.business@gmail.com, then approve access to Analytics and Search Console (read‑only).</span>
   </div>
 
   <div class="range-row" role="group" aria-label="Date range">
     <button class="range-btn" aria-pressed="false" data-range="today">Today</button>
     <button class="range-btn" aria-pressed="true" data-range="7d">Last 7 days</button>
     <button class="range-btn" aria-pressed="false" data-range="30d">Last 30 days</button>
+    <span class="last-updated" id="lastUpdated"></span>
   </div>
 
   <section class="sites" id="siteCards"></section>
@@ -215,14 +248,14 @@
         <div id="channelBars"></div>
         <div class="legend-note">Share of sessions by how people arrived — direct (typed URL / bookmark), organic search, paid search (Google Ads), referral (linked from another site).</div>
 
-        <div class="panel-title" style="margin-top:22px;">Top search terms</div>
+        <div class="panel-title" style="margin-top:22px;">Top search terms (Search Console)</div>
         <ul class="query-list" id="queryList"></ul>
       </div>
       <div>
-        <div class="panel-title">Recent sessions</div>
+        <div class="panel-title">Top landing pages</div>
         <table class="sessions">
           <thead>
-            <tr><th>Arrived via</th><th>Landing page</th><th>Pages</th><th>Time on site</th><th>Exit page</th><th>Visitor</th></tr>
+            <tr><th>Page</th><th>Sessions</th><th>Avg. time</th><th>New visitors</th></tr>
           </thead>
           <tbody id="sessionRows"></tbody>
         </table>
@@ -230,82 +263,328 @@
     </div>
   </section>
 
-  <footer>
-    Data shape mirrors the Google Analytics 4 Data API + Search Console API (sessions, channel group, landing/exit page, engagement time, new-vs-returning). No raw IP addresses are collected or shown anywhere — Google does not expose them, and Isle of Man data protection law treats them as personal data.
+  <footer id="footerNote">
+    Data pulled live from the Google Analytics 4 Data API + Search Console API (sessions, channel group, landing pages, engagement time, new‑vs‑returning). No raw IP addresses are collected or shown anywhere — Google does not expose them, and Isle of Man data protection law treats them as personal data. Individual visitor-by-visitor session logs aren't available from this API without a BigQuery export, so this shows real aggregated numbers rather than a session-by-session list.
   </footer>
 
 </div>
 
 <script>
-// ---- Mock data, shaped exactly like the real GA4/Search Console API responses will be ----
-const SITES = [
-  {
-    id: 'dgc', name: 'DGC Ltd', domain: 'dgc.im', color: 'var(--site-dgc)',
-    today: 7, week: 41, weekDelta: '+12%',
-    spark: [3,5,2,6,4,9,7],
-    channels: [
-      { label: 'Direct', value: 0.52, color: 'var(--ch-direct)' },
-      { label: 'Organic search', value: 0.21, color: 'var(--ch-organic)' },
-      { label: 'Paid search', value: 0.19, color: 'var(--ch-paid)' },
-      { label: 'Referral', value: 0.08, color: 'var(--ch-referral)' },
-    ],
-    queries: [
-      { term: 'drainage contractor isle of man', count: 4 },
-      { term: 'groundworks isle of man', count: 3 },
-      { term: 'dgc ltd', count: 2 },
-      { term: 'civil engineering iom', count: 1 },
-    ],
-    sessions: [
-      { source: 'Google Ads', landing: '/', pages: 3, duration: '2m 40s', exit: '/contact', visitor: 'returning' },
-      { source: 'Direct', landing: '/services', pages: 5, duration: '4m 05s', exit: '/services/drainage', visitor: 'new' },
-      { source: 'Organic search', landing: '/blog', pages: 2, duration: '1m 12s', exit: '/blog', visitor: 'new' },
-    ],
-  },
-  {
-    id: 'manx', name: 'Manx Drain Solutions', domain: 'manxdrainsolutions.com', color: 'var(--site-manx)',
-    today: 3, week: 22, weekDelta: '+6%',
-    spark: [2,4,1,3,5,4,3],
-    channels: [
-      { label: 'Direct', value: 0.45, color: 'var(--ch-direct)' },
-      { label: 'Organic search', value: 0.15, color: 'var(--ch-organic)' },
-      { label: 'Paid search', value: 0.34, color: 'var(--ch-paid)' },
-      { label: 'Referral', value: 0.06, color: 'var(--ch-referral)' },
-    ],
-    queries: [
-      { term: 'blocked drain isle of man', count: 3 },
-      { term: 'septic tank maintenance iom', count: 2 },
-      { term: 'cctv drain survey', count: 1 },
-    ],
-    sessions: [
-      { source: 'Google Ads', landing: '/', pages: 1, duration: '0m 45s', exit: '/', visitor: 'new' },
-      { source: 'Direct', landing: '/', pages: 4, duration: '3m 20s', exit: '/contact-us', visitor: 'returning' },
-    ],
-  },
-  {
-    id: 'silverdale', name: 'Silverdale Limited', domain: 'silverdale.im', color: 'var(--site-silverdale)',
-    today: 3, week: 78, weekDelta: '+290%',
-    spark: [6,9,19,26,12,7,3],
-    channels: [
-      { label: 'Direct', value: 0.56, color: 'var(--ch-direct)' },
-      { label: 'Organic search', value: 0.125, color: 'var(--ch-organic)' },
-      { label: 'Paid search', value: 0.30, color: 'var(--ch-paid)' },
-      { label: 'Referral', value: 0.015, color: 'var(--ch-referral)' },
-    ],
-    queries: [
-      { term: 'silverdale development', count: 1 },
-      { term: 'building control iom', count: 9 },
-      { term: 'ballaugh', count: 1 },
-    ],
-    sessions: [
-      { source: 'Direct', landing: '/', pages: 2, duration: '1m 05s', exit: '/about', visitor: 'new' },
-      { source: 'Organic search', landing: '/understanding-building-regulations-on-the-isle-of-man', pages: 1, duration: '3m 40s', exit: 'same page', visitor: 'new' },
-    ],
-  },
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
+const CLIENT_ID = '105622061315-vkgd0n8ogfjnbg475eoj2e7m0p2l20o4.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly';
+const TOKEN_STORAGE_KEY = 'dgc_dash_token_v1';
+
+const SITE_DEFS = [
+  { id: 'dgc', name: 'DGC Ltd', domain: 'dgc.im', color: 'var(--site-dgc)' },
+  { id: 'manx', name: 'Manx Drain Solutions', domain: 'manxdrainsolutions.com', color: 'var(--site-manx)' },
+  { id: 'silverdale', name: 'Silverdale Limited', domain: 'silverdale.im', color: 'var(--site-silverdale)' },
 ];
 
+const RANGE_DAYS = { today: 1, '7d': 7, '30d': 30 };
+let currentRange = '7d';
+let accessToken = null;
+let tokenClient = null;
+let siteState = {}; // id -> { propertyId, measurementId, data, error, scLoading, scUrl }
+
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+function saveToken(token, expiresInSec) {
+  const expiresAt = Date.now() + (expiresInSec * 1000) - 60000; // 1 min safety margin
+  try { sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify({ token, expiresAt })); } catch (e) {}
+}
+function loadStoredToken() {
+  try {
+    const raw = sessionStorage.getItem(TOKEN_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed.expiresAt > Date.now()) return parsed.token;
+  } catch (e) {}
+  return null;
+}
+
+function setStatus(kind, html) {
+  const el = document.getElementById('statusBanner');
+  el.className = 'status-banner' + (kind === 'err' ? ' err' : '');
+  el.innerHTML = `<span class="dot ${kind}"></span><span>${html}</span>`;
+}
+
+function initGoogle() {
+  if (!window.google || !google.accounts || !google.accounts.oauth2) {
+    setTimeout(initGoogle, 200);
+    return;
+  }
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if (resp.error) {
+        setStatus('err', `Sign-in failed: <strong>${resp.error}</strong>. Try Connect again.`);
+        return;
+      }
+      accessToken = resp.access_token;
+      saveToken(accessToken, resp.expires_in || 3500);
+      onSignedIn();
+    },
+  });
+
+  const stored = loadStoredToken();
+  if (stored) {
+    accessToken = stored;
+    onSignedIn();
+  }
+
+  document.getElementById('signInBtn').addEventListener('click', () => {
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  });
+}
+
+function onSignedIn() {
+  document.getElementById('authBox').innerHTML = `
+    <button class="btn secondary" id="refreshBtn">Refresh data</button>
+    <div class="signed-in-as">Connected to Google Analytics &amp; Search Console</div>`;
+  document.getElementById('refreshBtn').addEventListener('click', () => loadAllSites(true));
+  setStatus('live', 'Connected. Loading real data from Google Analytics…');
+  loadAllSites(false);
+}
+
+// ---------------------------------------------------------------------------
+// Google API helpers
+// ---------------------------------------------------------------------------
+async function gfetch(url, opts) {
+  const res = await fetch(url, {
+    ...opts,
+    headers: { ...(opts && opts.headers), Authorization: `Bearer ${accessToken}` },
+  });
+  if (res.status === 401) {
+    accessToken = null;
+    try { sessionStorage.removeItem(TOKEN_STORAGE_KEY); } catch (e) {}
+    throw new Error('Google sign-in expired — click Connect Google account again.');
+  }
+  const body = await res.json();
+  if (!res.ok) {
+    throw new Error((body.error && body.error.message) || `Request failed (${res.status})`);
+  }
+  return body;
+}
+
+async function discoverProperties() {
+  const data = await gfetch('https://analyticsadmin.googleapis.com/v1beta/accountSummaries?pageSize=200');
+  const props = [];
+  for (const acct of data.accountSummaries || []) {
+    for (const p of acct.propertySummaries || []) props.push(p);
+  }
+  const matches = {};
+  await Promise.all(props.map(async (p) => {
+    try {
+      const ds = await gfetch(`https://analyticsadmin.googleapis.com/v1beta/${p.property}/dataStreams`);
+      for (const stream of ds.dataStreams || []) {
+        const uri = (stream.webStreamData && stream.webStreamData.defaultUri) || '';
+        for (const site of SITE_DEFS) {
+          if (uri.includes(site.domain)) {
+            matches[site.id] = {
+              propertyId: p.property.split('/')[1],
+              measurementId: stream.webStreamData && stream.webStreamData.measurementId,
+              displayName: p.displayName,
+            };
+          }
+        }
+      }
+    } catch (e) { /* skip properties we can't read streams for */ }
+  }));
+  return matches;
+}
+
+async function discoverSearchConsoleSites() {
+  try {
+    const data = await gfetch('https://www.googleapis.com/webmasters/v3/sites');
+    const entries = data.siteEntry || [];
+    const matches = {};
+    for (const site of SITE_DEFS) {
+      const hit = entries.find(e => e.siteUrl.includes(site.domain));
+      if (hit) matches[site.id] = hit.siteUrl;
+    }
+    return matches;
+  } catch (e) {
+    return {};
+  }
+}
+
+function dateNDaysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+async function runGA4Reports(propertyId, days) {
+  const body = {
+    requests: [
+      { // A: daily sessions over 2x the range, for sparkline + delta
+        dateRanges: [{ startDate: dateNDaysAgo(days * 2 - 1), endDate: 'today' }],
+        dimensions: [{ name: 'date' }],
+        metrics: [{ name: 'sessions' }],
+        orderBys: [{ dimension: { dimensionName: 'date' } }],
+      },
+      { // B: channel breakdown
+        dateRanges: [{ startDate: dateNDaysAgo(days - 1), endDate: 'today' }],
+        dimensions: [{ name: 'sessionDefaultChannelGroup' }],
+        metrics: [{ name: 'sessions' }],
+      },
+      { // C: new vs returning
+        dateRanges: [{ startDate: dateNDaysAgo(days - 1), endDate: 'today' }],
+        dimensions: [{ name: 'newVsReturning' }],
+        metrics: [{ name: 'sessions' }],
+      },
+      { // D: top landing pages
+        dateRanges: [{ startDate: dateNDaysAgo(days - 1), endDate: 'today' }],
+        dimensions: [{ name: 'landingPagePlusQueryString' }],
+        metrics: [{ name: 'sessions' }, { name: 'averageSessionDuration' }],
+        orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+        limit: 6,
+      },
+    ],
+  };
+  const data = await gfetch(
+    `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:batchRunReports`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  );
+  return data.reports;
+}
+
+async function runSearchConsole(siteUrl, days) {
+  const data = await gfetch(
+    `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        startDate: dateNDaysAgo(days - 1),
+        endDate: dateNDaysAgo(0),
+        dimensions: ['query'],
+        rowLimit: 6,
+      }),
+    }
+  );
+  return (data.rows || []).map(r => ({ term: r.keys[0], count: Math.round(r.clicks) || Math.round(r.impressions * r.ctr) || 0 }));
+}
+
+const CHANNEL_COLOR = {
+  'Direct': 'var(--ch-direct)',
+  'Organic Search': 'var(--ch-organic)',
+  'Paid Search': 'var(--ch-paid)',
+  'Paid Social': 'var(--ch-paid)',
+  'Organic Social': 'var(--ch-organic)',
+  'Referral': 'var(--ch-referral)',
+  'Email': 'var(--ch-referral)',
+  'Unassigned': 'var(--ch-other)',
+};
+
+function shapeReports(reports, days) {
+  const [daily, channel, newRet, landing] = reports;
+
+  const dailyRows = (daily.rows || []).map(r => ({ date: r.dimensionValues[0].value, sessions: Number(r.metricValues[0].value) }));
+  const recent = dailyRows.slice(-days);
+  const prior = dailyRows.slice(0, Math.max(dailyRows.length - days, 0));
+  const todaySessions = recent.length ? recent[recent.length - 1].sessions : 0;
+  const weekSessions = recent.reduce((a, r) => a + r.sessions, 0);
+  const priorSessions = prior.reduce((a, r) => a + r.sessions, 0);
+  let weekDelta = null;
+  if (priorSessions > 0) weekDelta = Math.round(((weekSessions - priorSessions) / priorSessions) * 100);
+  else if (weekSessions > 0) weekDelta = null; // no prior period to compare against
+
+  const spark = recent.map(r => r.sessions);
+  while (spark.length < 2) spark.push(0);
+
+  const channelRows = (channel.rows || []).map(r => ({
+    label: r.dimensionValues[0].value,
+    sessions: Number(r.metricValues[0].value),
+  }));
+  const channelTotal = channelRows.reduce((a, r) => a + r.sessions, 0) || 1;
+  const channels = channelRows
+    .sort((a, b) => b.sessions - a.sessions)
+    .map(r => ({ label: r.label, value: r.sessions / channelTotal, color: CHANNEL_COLOR[r.label] || 'var(--ch-other)' }));
+
+  const newRetRows = (newRet.rows || []).map(r => ({ label: r.dimensionValues[0].value, sessions: Number(r.metricValues[0].value) }));
+  const newCount = newRetRows.find(r => r.label === 'new');
+  const newRetTotal = newRetRows.reduce((a, r) => a + r.sessions, 0) || 1;
+  const newShare = newCount ? newCount.sessions / newRetTotal : null;
+
+  const landingRows = (landing.rows || []).map(r => ({
+    page: r.dimensionValues[0].value,
+    sessions: Number(r.metricValues[0].value),
+    avgSeconds: Number(r.metricValues[1].value),
+  }));
+
+  return { todaySessions, weekSessions, weekDelta, spark, channels, newShare, landingRows };
+}
+
+function fmtDuration(sec) {
+  if (!sec || sec < 1) return '—';
+  const m = Math.floor(sec / 60), s = Math.round(sec % 60);
+  return m > 0 ? `${m}m ${s.toString().padStart(2, '0')}s` : `${s}s`;
+}
+
+// ---------------------------------------------------------------------------
+// Load pipeline
+// ---------------------------------------------------------------------------
+async function loadAllSites(isRefresh) {
+  const days = RANGE_DAYS[currentRange];
+  document.querySelectorAll('.range-btn').forEach(b => b.disabled = true);
+
+  try {
+    if (!siteState.__discovered) {
+      setStatus('live', 'Finding your Analytics properties…');
+      const gaMatches = await discoverProperties();
+      const scMatches = await discoverSearchConsoleSites();
+      for (const site of SITE_DEFS) {
+        siteState[site.id] = {
+          ...site,
+          ...(gaMatches[site.id] || {}),
+          scUrl: scMatches[site.id] || null,
+          data: null,
+          error: gaMatches[site.id] ? null : 'No matching Analytics property found for this domain under the connected account.',
+        };
+      }
+      siteState.__discovered = true;
+    }
+
+    renderCards(); // render skeleton / whatever we have so far
+
+    await Promise.all(SITE_DEFS.map(async (site) => {
+      const s = siteState[site.id];
+      if (!s.propertyId) return;
+      try {
+        const reports = await runGA4Reports(s.propertyId, days);
+        s.data = shapeReports(reports, days);
+        s.error = null;
+      } catch (e) {
+        s.error = e.message;
+      }
+      if (s.scUrl) {
+        try { s.data = s.data || {}; s.data.queries = await runSearchConsole(s.scUrl, days); }
+        catch (e) { s.data = s.data || {}; s.data.queries = []; s.data.queriesError = e.message; }
+      }
+    }));
+
+    setStatus('live', `Connected — showing real data for the ${days === 1 ? 'current day' : 'last ' + days + ' days'}.`);
+    document.getElementById('lastUpdated').textContent = 'Last updated ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    renderCards();
+  } catch (e) {
+    setStatus('err', `Couldn't load data: <strong>${e.message}</strong>. Try Refresh, or Connect Google account again if the sign-in expired.`);
+  } finally {
+    document.querySelectorAll('.range-btn').forEach(b => b.disabled = false);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Rendering
+// ---------------------------------------------------------------------------
 function sparkPath(values, w, h) {
-  const max = Math.max(...values), min = 0;
-  const step = w / (values.length - 1);
+  const max = Math.max(...values, 1), min = 0;
+  const step = w / Math.max(values.length - 1, 1);
   const pts = values.map((v, i) => {
     const x = i * step;
     const y = h - ((v - min) / (max - min || 1)) * (h - 4) - 2;
@@ -318,64 +597,87 @@ function sparkPath(values, w, h) {
 
 function renderCards() {
   const el = document.getElementById('siteCards');
-  el.innerHTML = SITES.map(s => {
-    const { line, area } = sparkPath(s.spark, 280, 40);
+  el.innerHTML = SITE_DEFS.map(def => {
+    const s = siteState[def.id] || def;
+    const color = def.color;
+
+    if (!siteState.__discovered) {
+      return `<div class="site-card skeleton"><div class="site-card-head"><span class="site-swatch" style="background:${color}"></span><span class="site-name">${def.name}</span><span class="site-domain">${def.domain}</span></div><div class="card-note">Connect Google to load…</div></div>`;
+    }
+    if (s.error && !s.data) {
+      return `<div class="site-card" data-site="${def.id}"><div class="site-card-head"><span class="site-swatch" style="background:${color}"></span><span class="site-name">${def.name}</span><span class="site-domain">${def.domain}</span></div><div class="card-note err">${s.error}</div></div>`;
+    }
+    if (!s.data) {
+      return `<div class="site-card skeleton"><div class="site-card-head"><span class="site-swatch" style="background:${color}"></span><span class="site-name">${def.name}</span><span class="site-domain">${def.domain}</span></div><div class="card-note">Loading…</div></div>`;
+    }
+
+    const d = s.data;
+    const { line, area } = sparkPath(d.spark, 280, 40);
+    const deltaHtml = d.weekDelta === null ? '' :
+      `<div class="stat-delta ${d.weekDelta < 0 ? 'neg' : ''}">${d.weekDelta > 0 ? '+' : ''}${d.weekDelta}% vs prior period</div>`;
+
     return `
-    <div class="site-card" data-site="${s.id}" tabindex="0" role="button" aria-expanded="false">
+    <div class="site-card" data-site="${def.id}" tabindex="0" role="button" aria-expanded="false">
       <div class="site-card-head">
-        <span class="site-swatch" style="background:${s.color}"></span>
-        <span class="site-name">${s.name}</span>
-        <span class="site-domain">${s.domain}</span>
+        <span class="site-swatch" style="background:${color}"></span>
+        <span class="site-name">${def.name}</span>
+        <span class="site-domain">${def.domain}</span>
       </div>
       <div class="stat-row">
         <div class="stat-tile">
           <div class="stat-label">Today</div>
-          <div class="stat-value">${s.today}</div>
+          <div class="stat-value">${d.todaySessions}</div>
         </div>
         <div class="stat-tile">
-          <div class="stat-label">This week</div>
-          <div class="stat-value">${s.week}</div>
-          <div class="stat-delta">${s.weekDelta} vs prior week</div>
+          <div class="stat-label">This period</div>
+          <div class="stat-value">${d.weekSessions}</div>
+          ${deltaHtml}
         </div>
       </div>
       <svg class="spark" viewBox="0 0 280 40" preserveAspectRatio="none">
-        <path class="spark-area" d="${area}" fill="${s.color}"></path>
-        <path class="spark-line" d="${line}" stroke="${s.color}"></path>
+        <path class="spark-area" d="${area}" fill="${color}"></path>
+        <path class="spark-line" d="${line}" stroke="${color}"></path>
       </svg>
-      <div class="expand-hint">Click to see search terms, traffic sources and sessions →</div>
+      <div class="expand-hint">Click to see search terms, traffic sources and landing pages →</div>
     </div>`;
   }).join('');
 
-  el.querySelectorAll('.site-card').forEach(card => {
+  el.querySelectorAll('.site-card[data-site]').forEach(card => {
     card.addEventListener('click', () => openDetail(card.dataset.site));
     card.addEventListener('keypress', e => { if (e.key === 'Enter') openDetail(card.dataset.site); });
   });
 }
 
 function openDetail(siteId) {
-  const s = SITES.find(x => x.id === siteId);
-  if (!s) return;
-  document.getElementById('detailTitle').textContent = s.name + ' — detail';
+  const s = siteState[siteId];
+  if (!s || !s.data) return;
+  const def = SITE_DEFS.find(x => x.id === siteId);
+  document.getElementById('detailTitle').textContent = def.name + ' — detail';
 
-  document.getElementById('channelBars').innerHTML = s.channels.map(c => `
-    <div class="chan-row">
-      <span class="chan-label">${c.label}</span>
-      <span class="chan-track"><span class="chan-fill" style="width:${(c.value*100).toFixed(0)}%;background:${c.color}"></span></span>
-      <span class="chan-value">${(c.value*100).toFixed(0)}%</span>
-    </div>`).join('');
+  document.getElementById('channelBars').innerHTML = s.data.channels.length
+    ? s.data.channels.map(c => `
+      <div class="chan-row">
+        <span class="chan-label">${c.label}</span>
+        <span class="chan-track"><span class="chan-fill" style="width:${(c.value*100).toFixed(0)}%;background:${c.color}"></span></span>
+        <span class="chan-value">${(c.value*100).toFixed(0)}%</span>
+      </div>`).join('')
+    : '<div class="empty-note">No channel data for this period.</div>';
 
-  document.getElementById('queryList').innerHTML = s.queries.map(q => `
-    <li><span class="query-term">${q.term}</span><span class="query-count">${q.count}</span></li>`).join('');
+  const queries = s.data.queries;
+  document.getElementById('queryList').innerHTML =
+    !s.scUrl ? '<li class="empty-note">This site isn\'t connected in Search Console under this Google account.</li>' :
+    (queries && queries.length) ? queries.map(q => `<li><span class="query-term">${q.term}</span><span class="query-count">${q.count}</span></li>`).join('') :
+    '<li class="empty-note">No search query data for this period yet.</li>';
 
-  document.getElementById('sessionRows').innerHTML = s.sessions.map(r => `
-    <tr>
-      <td class="source-cell">${r.source}</td>
-      <td>${r.landing}</td>
-      <td>${r.pages}</td>
-      <td>${r.duration}</td>
-      <td>${r.exit}</td>
-      <td><span class="pill ${r.visitor === 'new' ? 'new' : ''}">${r.visitor}</span></td>
-    </tr>`).join('');
+  document.getElementById('sessionRows').innerHTML = s.data.landingRows && s.data.landingRows.length
+    ? s.data.landingRows.map(r => `
+      <tr>
+        <td class="source-cell">${r.page}</td>
+        <td>${r.sessions}</td>
+        <td>${fmtDuration(r.avgSeconds)}</td>
+        <td>${s.data.newShare === null ? '—' : Math.round(s.data.newShare * 100) + '%'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty-note">No landing page data for this period.</td></tr>';
 
   document.getElementById('detailPanel').classList.add('open');
   document.getElementById('detailPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -387,13 +689,16 @@ document.getElementById('closeDetail').addEventListener('click', () => {
 
 document.querySelectorAll('.range-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    if (btn.getAttribute('aria-pressed') === 'true') return;
     document.querySelectorAll('.range-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
     btn.setAttribute('aria-pressed', 'true');
-    // Range switching will re-fetch from the real API once connected.
+    currentRange = btn.dataset.range;
+    if (accessToken) loadAllSites(true);
   });
 });
 
 renderCards();
+initGoogle();
 </script>
 </body>
 </html>
