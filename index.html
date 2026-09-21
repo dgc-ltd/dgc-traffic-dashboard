@@ -249,6 +249,9 @@
         <div id="channelBars"></div>
         <div class="legend-note">Share of sessions by how people arrived — direct (typed URL / bookmark), organic search, paid search (Google Ads), referral (linked from another site).</div>
 
+        <div class="panel-title" style="margin-top:22px;">Exactly where sessions came from</div>
+        <ul class="query-list" id="sourceList"></ul>
+
         <div class="panel-title" style="margin-top:22px;">Top search terms (Search Console)</div>
         <ul class="query-list" id="queryList"></ul>
       </div>
@@ -256,7 +259,7 @@
         <div class="panel-title">Top landing pages</div>
         <table class="sessions">
           <thead>
-            <tr><th>Page</th><th>Sessions</th><th>Avg. time</th><th>New visitors</th></tr>
+            <tr><th>Page</th><th>Sessions</th><th>Avg. time</th><th>New visitors</th><th>Contacted</th></tr>
           </thead>
           <tbody id="sessionRows"></tbody>
         </table>
@@ -471,12 +474,19 @@ async function runGA4Reports(propertyId, days) {
         dimensions: [{ name: 'newVsReturning' }],
         metrics: [{ name: 'sessions' }],
       },
-      { // D: top landing pages
+      { // D: top landing pages, incl. real conversions (form submits / calls) per page
         dateRanges: [{ startDate: dateNDaysAgo(days - 1), endDate: 'today' }],
         dimensions: [{ name: 'landingPagePlusQueryString' }],
-        metrics: [{ name: 'sessions' }, { name: 'averageSessionDuration' }],
+        metrics: [{ name: 'sessions' }, { name: 'averageSessionDuration' }, { name: 'conversions' }],
         orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
         limit: 6,
+      },
+      { // E: real source/medium breakdown (more specific than the 4-bucket channel groups)
+        dateRanges: [{ startDate: dateNDaysAgo(days - 1), endDate: 'today' }],
+        dimensions: [{ name: 'sessionSourceMedium' }],
+        metrics: [{ name: 'sessions' }],
+        orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+        limit: 8,
       },
     ],
   };
@@ -516,7 +526,7 @@ const CHANNEL_COLOR = {
 };
 
 function shapeReports(reports, days) {
-  const [daily, channel, newRet, landing] = reports;
+  const [daily, channel, newRet, landing, sources] = reports;
 
   const dailyRows = (daily.rows || []).map(r => ({ date: r.dimensionValues[0].value, sessions: Number(r.metricValues[0].value) }));
   const recent = dailyRows.slice(-days);
@@ -549,9 +559,15 @@ function shapeReports(reports, days) {
     page: r.dimensionValues[0].value,
     sessions: Number(r.metricValues[0].value),
     avgSeconds: Number(r.metricValues[1].value),
+    conversions: Number(r.metricValues[2].value),
   }));
 
-  return { todaySessions, weekSessions, weekDelta, spark, channels, newShare, landingRows };
+  const sourceRows = (sources.rows || []).map(r => ({
+    label: r.dimensionValues[0].value,
+    sessions: Number(r.metricValues[0].value),
+  }));
+
+  return { todaySessions, weekSessions, weekDelta, spark, channels, newShare, landingRows, sourceRows };
 }
 
 function fmtDuration(sec) {
@@ -696,6 +712,10 @@ function openDetail(siteId) {
       </div>`).join('')
     : '<div class="empty-note">No channel data for this period.</div>';
 
+  document.getElementById('sourceList').innerHTML = s.data.sourceRows && s.data.sourceRows.length
+    ? s.data.sourceRows.map(r => `<li><span class="query-term">${r.label}</span><span class="query-count">${r.sessions}</span></li>`).join('')
+    : '<li class="empty-note">No source data for this period.</li>';
+
   const queries = s.data.queries;
   document.getElementById('queryList').innerHTML =
     !s.scUrl ? '<li class="empty-note">This site isn\'t connected in Search Console under this Google account.</li>' :
@@ -709,8 +729,9 @@ function openDetail(siteId) {
         <td>${r.sessions}</td>
         <td>${fmtDuration(r.avgSeconds)}</td>
         <td>${s.data.newShare === null ? '—' : Math.round(s.data.newShare * 100) + '%'}</td>
+        <td>${r.conversions > 0 ? `<span class="pill new">${r.conversions}</span>` : '—'}</td>
       </tr>`).join('')
-    : '<tr><td colspan="4" class="empty-note">No landing page data for this period.</td></tr>';
+    : '<tr><td colspan="5" class="empty-note">No landing page data for this period.</td></tr>';
 
   document.getElementById('detailPanel').classList.add('open');
   document.getElementById('detailPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
