@@ -68,7 +68,8 @@
   h1 { font-size: 22px; margin: 0 0 4px; }
   .subhead { color: var(--text-secondary); font-size: 13px; margin: 0; }
 
-  .auth-box { text-align: right; }
+  .auth-box { text-align: right; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+  .auth-box .signed-in-as { flex-basis: 100%; }
   .btn {
     font: inherit; font-size: 13px; padding: 8px 14px; border-radius: 8px;
     border: 1px solid var(--border); background: var(--text-primary); color: var(--page);
@@ -315,6 +316,9 @@ function setStatus(kind, html) {
   el.innerHTML = `<span class="dot ${kind}"></span><span>${html}</span>`;
 }
 
+const REQUIRED_ACCOUNT = 'usiom.business@gmail.com';
+const EVER_CONNECTED_KEY = 'dgc_dash_ever_connected_v1';
+
 function initGoogle() {
   if (!window.google || !google.accounts || !google.accounts.oauth2) {
     setTimeout(initGoogle, 200);
@@ -323,16 +327,22 @@ function initGoogle() {
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
+    hint: REQUIRED_ACCOUNT,
     callback: (resp) => {
       if (resp.error) {
         // Silent attempt failed (needs a real click) — fall back to the visible button quietly.
-        if (resp.error === 'interaction_required' || resp.error === 'access_denied' || resp.error === 'immediate_failed') {
+        if (resp.error === 'interaction_required' || resp.error === 'immediate_failed') {
           setStatus('muted', 'Not connected yet — click <strong>Connect Google account</strong> above to sign back in (happens roughly once a week while this app is in Google\'s testing mode).');
+          return;
+        }
+        if (resp.error === 'access_denied') {
+          setStatus('err', `Access denied — this only works signed in as <strong>${REQUIRED_ACCOUNT}</strong>. Click Connect Google account and pick that account specifically (use "Switch account" below if it grabbed the wrong one).`);
           return;
         }
         setStatus('err', `Sign-in failed: <strong>${resp.error}</strong>. Try Connect again.`);
         return;
       }
+      try { localStorage.setItem(EVER_CONNECTED_KEY, '1'); } catch (e) {}
       accessToken = resp.access_token;
       saveToken(accessToken, resp.expires_in || 3500);
       onSignedIn();
@@ -343,9 +353,11 @@ function initGoogle() {
   if (stored) {
     accessToken = stored;
     onSignedIn();
-  } else {
-    // Try a silent, no-click re-auth first (works if this browser still has an active Google
-    // session and has approved this app before) — only falls back to a visible prompt if that fails.
+  } else if (localStorage.getItem(EVER_CONNECTED_KEY) === '1') {
+    // Only attempt a silent, no-click re-auth if THIS browser has completed a real sign-in
+    // before (so we know the right account already granted consent) — never auto-attempt on
+    // a first-ever visit, since that can silently grab whatever Google account happens to be
+    // active in the browser and hit an access-denied wall with no clear way out.
     tokenClient.requestAccessToken({ prompt: '' });
   }
 
@@ -357,10 +369,16 @@ function initGoogle() {
 function onSignedIn() {
   document.getElementById('authBox').innerHTML = `
     <button class="btn secondary" id="refreshBtn">Refresh data</button>
+    <button class="btn secondary" id="switchAcctBtn">Switch account</button>
     <div class="signed-in-as">Connected to Google Analytics &amp; Search Console</div>`;
   document.getElementById('refreshBtn').addEventListener('click', () => {
     if (!accessToken) { tokenClient.requestAccessToken({ prompt: '' }); return; }
     loadAllSites(true);
+  });
+  document.getElementById('switchAcctBtn').addEventListener('click', () => {
+    accessToken = null;
+    clearStoredToken();
+    tokenClient.requestAccessToken({ prompt: 'select_account' });
   });
   setStatus('live', 'Connected. Loading real data from Google Analytics…');
   loadAllSites(false);
