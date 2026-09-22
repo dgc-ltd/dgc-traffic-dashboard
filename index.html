@@ -364,9 +364,16 @@ function initGoogle() {
     tokenClient.requestAccessToken({ prompt: '' });
   }
 
-  document.getElementById('signInBtn').addEventListener('click', () => {
-    tokenClient.requestAccessToken({ prompt: 'consent' });
-  });
+  // signInBtn may already be gone from the DOM at this point — onSignedIn() (called above,
+  // synchronously, if a stored token existed) replaces #authBox's innerHTML and removes it.
+  // Guard instead of assuming it's still there, which used to throw here and silently abort
+  // the rest of initGoogle() (including, on some paths, leaving later setup incomplete).
+  const btn = document.getElementById('signInBtn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    });
+  }
 }
 
 async function onSignedIn() {
@@ -634,6 +641,15 @@ async function loadAllSites(isRefresh) {
     document.getElementById('lastUpdated').textContent = 'Last updated ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     renderCards();
   } catch (e) {
+    // A locally-cached token can look valid (per its stored expiry) but still get rejected by
+    // Google server-side. Self-heal once with a silent re-auth instead of dead-ending on an
+    // error message — this is exactly the case that used to strand people on a stale error.
+    const looksExpired = /expired/i.test(e.message);
+    if (looksExpired && !isRefresh && localStorage.getItem(EVER_CONNECTED_KEY) === '1') {
+      setStatus('live', 'Sign-in needed a silent refresh — retrying…');
+      tokenClient.requestAccessToken({ prompt: '' });
+      return;
+    }
     setStatus('err', `Couldn't load data: <strong>${e.message}</strong>. Try Refresh, or Connect Google account again if the sign-in expired.`);
   } finally {
     document.querySelectorAll('.range-btn').forEach(b => b.disabled = false);
