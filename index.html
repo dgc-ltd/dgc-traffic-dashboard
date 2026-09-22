@@ -278,7 +278,7 @@
 // Config
 // ---------------------------------------------------------------------------
 const CLIENT_ID = '105622061315-vkgd0n8ogfjnbg475eoj2e7m0p2l20o4.apps.googleusercontent.com';
-const SCOPES = 'https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly';
+const SCOPES = 'https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/userinfo.email';
 const TOKEN_STORAGE_KEY = 'dgc_dash_token_v1';
 
 const SITE_DEFS = [
@@ -369,7 +369,7 @@ function initGoogle() {
   });
 }
 
-function onSignedIn() {
+async function onSignedIn() {
   document.getElementById('authBox').innerHTML = `
     <button class="btn secondary" id="refreshBtn">Refresh data</button>
     <button class="btn secondary" id="switchAcctBtn">Switch account</button>
@@ -383,6 +383,18 @@ function onSignedIn() {
     clearStoredToken();
     tokenClient.requestAccessToken({ prompt: 'select_account' });
   });
+
+  // Show exactly which Google account is connected, in plain sight, at all times —
+  // this is the only way to catch a wrong-account mix-up before it shows misleading data.
+  try {
+    const info = await gfetch('https://www.googleapis.com/oauth2/v3/userinfo');
+    const label = document.querySelector('.signed-in-as');
+    if (label) label.textContent = 'Connected as ' + info.email;
+    if (info.email !== REQUIRED_ACCOUNT) {
+      setStatus('err', `Warning: signed in as <strong>${info.email}</strong>, not ${REQUIRED_ACCOUNT}. Data below belongs to the wrong Google account — click Switch account and pick the right one.`);
+    }
+  } catch (e) { /* non-fatal — carry on without the email label */ }
+
   setStatus('live', 'Connected. Loading real data from Google Analytics…');
   loadAllSites(false);
 }
