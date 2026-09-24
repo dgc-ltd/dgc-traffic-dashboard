@@ -276,9 +276,9 @@
 
     <div class="section">
       <div class="panel-title">Pages people arrived on</div>
-      <div class="panel-sub">The first page of each visit — shows what's pulling people in, and which pages keep them reading. Active time is the best guide here: a high "engaged" count with almost no active time means bots or background tabs.</div>
+      <div class="panel-sub">The first page of each visit — shows what's pulling people in, and which pages keep them reading. Active time is the best guide here: a high "engaged" count with almost no active time means bots or background tabs. <strong>Last visit</strong> is the most recent day in this period; a greyed date is a week or more old, so it's past activity.</div>
       <div class="table-wrap"><table class="data">
-        <thead><tr><th>First page</th><th class="num">Visits</th><th class="num">Engaged<br>(Google)</th><th class="num">Active time<br>per visit</th><th class="num">Pages<br>per visit</th><th class="num">First-time</th><th class="num">Messages</th><th id="landingMainHead">Mostly from</th></tr></thead>
+        <thead><tr><th>First page</th><th class="num">Visits</th><th class="num">Engaged<br>(Google)</th><th class="num">Active time<br>per visit</th><th class="num">Pages<br>per visit</th><th class="num">First-time</th><th class="num">Messages</th><th class="num">Last visit</th><th id="landingMainHead">Mostly from</th></tr></thead>
         <tbody id="landingRows"></tbody>
       </table></div>
     </div>
@@ -287,10 +287,10 @@
       <div class="panel-title">Every page they looked at</div>
       <div class="panel-sub">All page views, not just the first page — which content actually gets read.</div>
       <div class="table-wrap"><table class="data">
-        <thead><tr><th>Page</th><th class="num">Views</th><th class="num">People</th><th class="num">Active time<br>per view</th><th class="num">Read to<br>the bottom</th><th class="num">Messages<br>sent here</th></tr></thead>
+        <thead><tr><th>Page</th><th class="num">Views</th><th class="num">People</th><th class="num">Active time<br>per view</th><th class="num">Read to<br>the bottom</th><th class="num">Messages<br>sent here</th><th class="num">Last visit</th></tr></thead>
         <tbody id="pageRows"></tbody>
       </table></div>
-      <div class="panel-note"><strong>Read to the bottom</strong>: share of views where the visitor scrolled at least 90% of the way down the page.</div>
+      <div class="panel-note"><strong>Read to the bottom</strong>: share of views where the visitor scrolled at least 90% of the way down the page. <strong>Last visit</strong>: the most recent day in this period the page was viewed. A date a week or more old (greyed) means past activity, not something happening now.</div>
     </div>
 
     <div class="detail-grid">
@@ -612,6 +612,8 @@ async function runGA4Reports(propertyId, days) {
     ] }).then(d => d.reports),
     postJSON(`${base}:batchRunReports`, { requests: [
       q([CH, 'landingPagePlusQueryString'], ['eventCount'], { dimensionFilter: inList('eventName', MESSAGE_EVENTS) }),
+      q([CH, 'landingPagePlusQueryString', 'date'], ['sessions'], { limit: 10000 }),
+      q([CH, 'pagePath', 'date'], ['screenPageViews'], { limit: 10000 }),
     ] }).then(d => d.reports),
     postJSON(`${base}:runRealtimeReport`, { metrics: [{ name: 'activeUsers' }] }).catch(() => null),
   ]);
@@ -631,6 +633,8 @@ async function runGA4Reports(propertyId, days) {
     pageEvents: toObjects(b[2], ['ch', 'path', 'name'], ['count']),
     noPage:     toObjects(b[4], ['ch', 'landing', 'path'], ['count']).map(r => ({ ...r, landing: '(not set)' })),
     landingMsgs: toObjects(c[0], ['ch', 'page'], ['count']).map(r => ({ ...r, page: NO_PAGE.includes(r.page) ? '(not set)' : r.page })),
+    landingDates: toObjects(c[1], ['ch', 'page', 'date'], ['n']).map(r => ({ ...r, page: NO_PAGE.includes(r.page) ? '(not set)' : r.page })),
+    pageDates: toObjects(c[2], ['ch', 'path', 'date'], ['n']),
     lastDataDate: lastRow ? lastRow.dimensionValues[0].value : null,
     liveNow: live && live.rows && live.rows.length ? Number(live.rows[0].metricValues[0].value) : 0,
   };
@@ -920,6 +924,24 @@ function barChart(buckets, labels, axisEvery, color, titleFn) {
     <div class="legend"><span><span class="swatch" style="background:${color}"></span>Engaged (Google's count)</span><span><span class="swatch" style="background:var(--gridline)"></span>Didn't engage</span></div>`;
 }
 
+// Shown on every page row so old activity inside a long range isn't mistaken for something current.
+function lastDates(rows, keyFn) {
+  const out = {};
+  for (const r of rows) {
+    if (r.n <= 0) continue;
+    const k = keyFn(r);
+    if (!out[k] || r.date > out[k]) out[k] = r.date;
+  }
+  return out;
+}
+function lastVisitText(yyyymmdd) {
+  if (!yyyymmdd) return '—';
+  if (yyyymmdd === utcDay(0).replace(/-/g, '')) return 'Today';
+  if (yyyymmdd === utcDay(1).replace(/-/g, '')) return 'Yesterday';
+  const ageDays = Math.floor((Date.parse(utcDay(0)) - Date.UTC(+yyyymmdd.slice(0, 4), +yyyymmdd.slice(4, 6) - 1, +yyyymmdd.slice(6, 8))) / 86400000);
+  return ageDays >= 7 ? `<span class="muted">${fmtDate(yyyymmdd)}</span>` : fmtDate(yyyymmdd);
+}
+
 function openDetail(siteId, scroll) {
   const s = siteState[siteId];
   if (!s || !s.raw) return;
@@ -1011,6 +1033,7 @@ function openDetail(siteId, scroll) {
     .map(([p]) => (p === '/' ? 'Home page' : (titles[p] ? `${titles[p]} (${p})` : p)));
   const msgByLanding = {};
   for (const r of raw.landingMsgs.filter(inSource)) msgByLanding[r.page] = (msgByLanding[r.page] || 0) + r.count;
+  const lastByLanding = lastDates(raw.landingDates.filter(inSource), r => r.page);
   const landing = sumBy(raw.landing.filter(inSource), r => r.page, ['sessions', 'engaged', 'eng', 'views', 'newU']).sort((a, b) => b.sessions - a.sessions).slice(0, 15);
   document.getElementById('landingMainHead').style.display = sourceFilter === 'all' ? '' : 'none';
   document.getElementById('landingRows').innerHTML = landing.length
@@ -1023,9 +1046,10 @@ function openDetail(siteId, scroll) {
         <td class="num">${r.views ? perText(r.views, r.sessions) : '—'}</td>
         <td class="num">${pctText(r.newU, r.sessions)}</td>
         <td class="num">${msgByLanding[r.key] ? `<span class="pill good">${msgByLanding[r.key]}</span>` : '—'}</td>
+        <td class="num">${lastVisitText(lastByLanding[r.key])}</td>
         ${sourceFilter === 'all' ? `<td>${esc(mainSource(r.byCh))}</td>` : ''}
       </tr>`).join('')
-    : '<tr><td colspan="8" class="empty-note">No visits from this source in this period.</td></tr>';
+    : '<tr><td colspan="9" class="empty-note">No visits from this source in this period.</td></tr>';
 
   // Every page viewed
   const pageEv = {};
@@ -1034,6 +1058,7 @@ function openDetail(siteId, scroll) {
     if (r.name === 'scroll') e.scroll += r.count; else e.msgs += r.count;
   }
   const pages = sumBy(raw.pages.filter(inSource), r => r.path, ['views', 'eng', 'people']).sort((a, b) => b.views - a.views).slice(0, 20);
+  const lastByPage = lastDates(raw.pageDates.filter(inSource), r => r.path);
   document.getElementById('pageRows').innerHTML = pages.length
     ? pages.map(r => {
         const e = pageEv[r.key] || { scroll: 0, msgs: 0 };
@@ -1045,9 +1070,10 @@ function openDetail(siteId, scroll) {
           <td class="num">${fmtDuration(ratio(r.eng, r.views))}</td>
           <td class="num">${r.views > 0 ? pctText(Math.min(e.scroll, r.views), r.views) : '—'}</td>
           <td class="num">${e.msgs ? `<span class="pill good">${e.msgs}</span>` : '—'}</td>
+          <td class="num">${lastVisitText(lastByPage[r.key])}</td>
         </tr>`;
       }).join('')
-    : '<tr><td colspan="6" class="empty-note">No page views from this source in this period.</td></tr>';
+    : '<tr><td colspan="7" class="empty-note">No page views from this source in this period.</td></tr>';
 
   // Enquiries
   const evTotals = {};
