@@ -752,12 +752,14 @@ async function loadAllSites(isRefresh) {
   try {
     const results = await Promise.all(SITE_DEFS.map(async (site) => {
       const out = { raw: null, summary: null, error: null, search: null, searchError: null };
-      try {
-        out.raw = await runGA4Reports(site.propertyId, days);
-        out.summary = summarise(out.raw, days);
-      } catch (e) { out.error = e.message; firstError = firstError || e; }
-      try { out.search = await runSearchConsole(site.scUrl, days); }
-      catch (e) { out.searchError = e.message; }
+      await Promise.all([
+        runGA4Reports(site.propertyId, days)
+          .then(raw => { out.raw = raw; out.summary = summarise(raw, days); })
+          .catch(e => { out.error = e.message; firstError = firstError || e; }),
+        runSearchConsole(site.scUrl, days)
+          .then(sc => { out.search = sc; })
+          .catch(e => { out.searchError = e.message; }),
+      ]);
       return [site.id, out];
     }));
     if (seq !== loadSeq) return;
