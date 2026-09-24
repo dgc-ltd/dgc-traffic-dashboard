@@ -616,15 +616,15 @@ async function runGA4Reports(propertyId, days) {
   const lastRow = ((b[3] && b[3].rows) || [])[0];
   return {
     groups,
-    landing:    toObjects(a[1], ['ch', 'page'], visitKeys),
+    landing:    toObjects(a[1], ['ch', 'page'], visitKeys).map(r => ({ ...r, page: NO_PAGE.includes(r.page) ? '(not set)' : r.page })),
     pages:      toObjects(a[2], ['ch', 'path', 'title'], ['views', 'eng', 'people']),
     hours:      toObjects(a[3], ['ch', 'hour'], ['sessions', 'engaged']),
     weekdays:   toObjects(a[4], ['ch', 'dow'], ['sessions', 'engaged']),
     sources:    toObjects(b[0], ['ch', 'sm'], visitKeys),
     events:     toObjects(b[1], ['ch', 'name', 'date'], ['count']),
     pageEvents: toObjects(b[2], ['ch', 'path', 'name'], ['count']),
-    noPage:     toObjects(b[4], ['ch', 'landing', 'path'], ['count']),
-    landingMsgs: toObjects(c[0], ['ch', 'page'], ['count']),
+    noPage:     toObjects(b[4], ['ch', 'landing', 'path'], ['count']).map(r => ({ ...r, landing: '(not set)' })),
+    landingMsgs: toObjects(c[0], ['ch', 'page'], ['count']).map(r => ({ ...r, page: NO_PAGE.includes(r.page) ? '(not set)' : r.page })),
     lastDataDate: lastRow ? lastRow.dimensionValues[0].value : null,
     liveNow: live && live.rows && live.rows.length ? Number(live.rows[0].metricValues[0].value) : 0,
   };
@@ -1014,7 +1014,7 @@ function openDetail(siteId, scroll) {
         <td class="num">${r.sessions}</td>
         <td class="num">${r.engaged}</td>
         <td class="num">${fmtDuration(ratio(r.eng, r.sessions))}</td>
-        <td class="num">${perText(r.views, r.sessions)}</td>
+        <td class="num">${r.views ? perText(r.views, r.sessions) : '—'}</td>
         <td class="num">${pctText(r.newU, r.sessions)}</td>
         <td class="num">${msgByLanding[r.key] ? `<span class="pill good">${msgByLanding[r.key]}</span>` : '—'}</td>
         ${sourceFilter === 'all' ? `<td>${esc(mainSource(r.byCh))}</td>` : ''}
