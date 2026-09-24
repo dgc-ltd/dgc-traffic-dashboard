@@ -311,6 +311,8 @@ const EVENT_LABELS = {
 };
 const CONTACT_EVENTS = Object.keys(EVENT_LABELS);
 const STALE_AFTER_DAYS = 3;
+const BURIED_POSITION = 30;
+const REQUEST_TIMEOUT_MS = 25000;
 
 const RANGE_DAYS = { today: 1, '7d': 7, '30d': 30 };
 let currentRange = '7d';
@@ -426,10 +428,16 @@ async function onSignedIn() {
 // Google API helpers
 // ---------------------------------------------------------------------------
 async function gfetch(url, opts) {
-  const res = await fetch(url, {
-    ...opts,
-    headers: { ...(opts && opts.headers), Authorization: `Bearer ${accessToken}` },
-  });
+  let res;
+  try {
+    res = await fetch(url, {
+      ...opts,
+      headers: { ...(opts && opts.headers), Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+  } catch (e) {
+    throw new Error(e.name === 'TimeoutError' ? 'Google took too long to answer — press Refresh data to try again.' : 'Network problem reaching Google — check the connection and press Refresh data.');
+  }
   if (res.status === 401) {
     accessToken = null;
     clearStoredToken();
@@ -479,13 +487,18 @@ async function runSearchConsole(siteUrl, days) {
     `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`,
     { startDate: utcDay(scDays - 1), endDate: utcDay(0), dimensions: ['query'], rowLimit: 100, dataState: 'all' }
   );
-  const terms = (data.rows || []).map(r => ({ term: r.keys[0], clicks: r.clicks, shown: r.impressions, pos: r.position }));
-  terms.sort((a, b) => b.clicks - a.clicks || b.shown - a.shown);
+  const all = (data.rows || []).map(r => ({ term: r.keys[0], clicks: r.clicks, shown: r.impressions, pos: r.position }));
+  all.sort((a, b) => b.clicks - a.clicks || b.shown - a.shown);
+  // Page 4+ appearances are Google loosely matching a page to a far-off search (e.g. an Isle of Man
+  // bathroom project vs "bathroom renovation ashby-de-la-zouch"); nobody scrolls that far.
+  const visible = all.filter(t => t.clicks > 0 || t.pos <= BURIED_POSITION);
+  const buried = all.filter(t => !(t.clicks > 0 || t.pos <= BURIED_POSITION));
   return {
     scDays,
-    terms: terms.slice(0, 12),
-    totalClicks: terms.reduce((a, t) => a + t.clicks, 0),
-    termCount: terms.length,
+    terms: visible.slice(0, 12),
+    buried,
+    totalClicks: all.reduce((a, t) => a + t.clicks, 0),
+    termCount: all.length,
   };
 }
 
@@ -644,7 +657,6 @@ function renderCards() {
     const secondLabel = days === 1 ? 'Yesterday' : `Last ${days} days`;
     const secondReal = days === 1 ? d.priorReal : d.periodReal;
     const secondTotal = days === 1 ? d.priorSessions : d.periodSessions;
-    const iomPct = d.periodReal > 0 ? Math.round((d.iomReal / d.periodReal) * 100) + '%' : '—';
 
     return `
     <div class="site-card${openSiteId === def.id ? ' selected' : ''}" data-site="${def.id}" tabindex="0" role="button" aria-expanded="${openSiteId === def.id}">
@@ -668,7 +680,7 @@ function renderCards() {
       </svg>
       <div class="mini-row">
         <span>Messages sent: <strong>${d.messages}</strong></span>
-        <span>From Isle of Man: <strong>${iomPct}</strong></span>
+        <span>Real visits from Isle of Man: <strong>${d.iomReal}</strong></span>
         <span>On site now: <strong>${d.liveNow}</strong></span>
       </div>
       <div class="expand-hint">Click for enquiries, search terms, locations and pages →</div>
@@ -739,7 +751,11 @@ function openDetail(siteId, scroll) {
         <td class="num">${t.clicks > 0 ? `<span class="pill good">${t.clicks}</span>` : '0'}</td>
         <td class="num">${t.pos.toFixed(0)}</td>
       </tr>`).join('');
-    termNote.innerHTML = `Last ${s.search.scDays} days${days < s.search.scDays ? ' (search data needs at least a week to be useful)' : ''}. <strong>Shown</strong> = how many times this site appeared in Google results for that search. <strong>Clicked</strong> = how many people then clicked through. <strong>Position</strong> = average ranking (1 = top of page one; 11+ = page two or later). ${s.search.totalClicks} click${s.search.totalClicks === 1 ? '' : 's'} from ${s.search.termCount} different searches in total. Google reports search data 2–3 days late.`;
+    const buried = s.search.buried;
+    const buriedText = buried.length
+      ? ` Also appeared on page 4 or later (where nobody looks) for ${buried.length} other search${buried.length === 1 ? '' : 'es'}, e.g. "${esc(buried.slice(0, 2).map(t => t.term).join('", "'))}". Those are Google loosely matching a page, not real interest, so they're left out above.`
+      : '';
+    termNote.innerHTML = `Last ${s.search.scDays} days${days < s.search.scDays ? ' (search data needs at least a week to be useful)' : ''}. <strong>Shown</strong> = how many times this site appeared in Google results for that search. <strong>Clicked</strong> = how many people then clicked through. <strong>Position</strong> = average ranking (1 = top of page one; 11+ = page two or later). ${s.search.totalClicks} click${s.search.totalClicks === 1 ? '' : 's'} from ${s.search.termCount} different searches in total. Google reports search data 2–3 days late.${buriedText}`;
   }
 
   const pageLabel = (p) => p === '/' ? 'Home page (/)' : (p === '' || p === '(not set)' ? '(unknown — usually bots)' : p);
