@@ -319,7 +319,7 @@
       <div class="panel-title">How people behave, depending on how they found us</div>
       <div class="panel-sub">Each row is a different way people found the website. Compare how long each group stayed and how much they looked at. Tap a row to see only that group everywhere on this page.</div>
       <div class="table-wrap"><table class="data">
-        <thead><tr><th>How they found us</th><th class="num">Visits</th><th class="num">Real people</th><th class="num tech">Google's own<br>count</th><th class="num">Time reading<br>(each)</th><th class="num">Pages looked<br>at (each)</th><th class="num">New<br>visitors</th><th class="num">Messages<br>sent</th></tr></thead>
+        <thead><tr><th>How they found us</th><th class="num">Visits</th><th class="num">Real people</th><th class="num tech">Google's own<br>count</th><th class="num">Time reading<br>(each)</th><th class="num">Pages looked<br>at (each)</th><th class="num">New<br>visitors</th><th class="num">Customer<br>messages</th></tr></thead>
         <tbody id="compareRows"></tbody>
       </table></div>
       <div class="panel-note"><strong>Visits</strong> includes robots. <strong>Real people</strong> are visits where someone actually looked at the page. <strong>Time reading</strong> and <strong>pages looked at</strong> are averages for the real people only. <strong>New visitors</strong> had never been to the site before.<span class="tech"> <strong>Google's own count</strong> ("engaged sessions") also counts tabs left open in the background and robots that hold a page open, so it's higher.</span></div>
@@ -332,7 +332,7 @@
         <thead><tr><th>Page</th><th class="num">Visits</th><th class="num tech">Google's own<br>count</th><th class="num">Average time<br>reading</th><th class="num">Pages looked<br>at (average)</th><th class="num">New<br>visitors</th><th class="num">Messages</th><th class="num">Last visit</th><th id="landingMainHead">Mostly came from</th></tr></thead>
         <tbody id="landingRows"></tbody>
       </table></div>
-      <div class="panel-note">Averages here include every visit, robots too, so they're lower than for real people. <strong>Last visit</strong> is the most recent day someone arrived on that page; a greyed date is a week or more ago, so it's past activity, not something happening now.</div>
+      <div class="panel-note">Averages here include every visit, robots too, so they're lower than for real people. <strong>Messages</strong> here include our own tests of the form. <strong>Last visit</strong> is the most recent day someone arrived on that page; a greyed date is a week or more ago, so it's past activity, not something happening now.</div>
     </div>
 
     <div class="section">
@@ -342,7 +342,7 @@
         <thead><tr><th>Page</th><th class="num">Times<br>opened</th><th class="num">Different<br>people</th><th class="num">Time reading<br>(each time)</th><th class="num">Read to<br>the end</th><th class="num">Messages<br>sent here</th><th class="num">Last visit</th></tr></thead>
         <tbody id="pageRows"></tbody>
       </table></div>
-      <div class="panel-note"><strong>Read to the end</strong>: how often people scrolled at least 90% of the way down the page.</div>
+      <div class="panel-note"><strong>Read to the end</strong>: how often people scrolled at least 90% of the way down the page. <strong>Messages sent here</strong> include our own tests of the form.</div>
     </div>
 
     <div class="detail-grid">
@@ -433,8 +433,10 @@ const SITE_DEFS = [
     notTracked: ['Calls made straight from the Google advert.'] },
   { id: 'manx', name: 'Manx Drain Solutions', domain: 'manxdrainsolutions.com', color: 'var(--site-manx)', propertyId: '373340845', scUrl: 'https://manxdrainsolutions.com/', messagesTracked: false,
     notTracked: ['Calls and enquiries from the Google advert. The Google Ads tag isn\'t on the website yet, so Google Ads can\'t see any results.', 'Whether a contact-form message was actually sent. This site only records that someone started filling the form in.'] },
+  // testDays: every form send on these days was checked in Elementor > Submissions and was our own test
+  // (24 Sep 2026). Tests after that come from the office IP, which Analytics now excludes.
   { id: 'silverdale', name: 'Silverdale Limited', domain: 'silverdale.im', color: 'var(--site-silverdale)', propertyId: '496195002', scUrl: 'https://www.silverdale.im/', messagesTracked: true,
-    notTracked: [] },
+    testDays: ['20260917', '20260922', '20260924'], notTracked: [] },
 ];
 const NOT_TRACKED_ALL = [
   'When someone taps the phone number or email address.',
@@ -806,7 +808,9 @@ function sourceName(sm) {
 }
 const placeOf = (g) => (g.country === 'Isle of Man' ? `Isle of Man · ${g.city === '(not set)' ? 'town unknown' : g.city}` : g.country === '(not set)' ? 'Location unknown' : g.country);
 
-function summarise(raw, days) {
+const isTestDay = (def, date) => !!(def.testDays && def.testDays.includes(date));
+
+function summarise(def, raw, days) {
   // Card-level figures are always all sources.
   const byDate = {};
   for (const r of raw.groups) {
@@ -826,7 +830,8 @@ function summarise(raw, days) {
   const realByCh = {};
   for (const g of current) realByCh[g.ch] = (realByCh[g.ch] || 0) + g.real;
   const iomReal = total(current.filter(g => g.country === 'Isle of Man'), 'real');
-  const messages = total(raw.events.filter(e => MESSAGE_EVENTS.includes(e.name)), 'count');
+  const messages = total(raw.events.filter(e => MESSAGE_EVENTS.includes(e.name) && !isTestDay(def, e.date)), 'count');
+  const testMessages = total(raw.events.filter(e => MESSAGE_EVENTS.includes(e.name) && isTestDay(def, e.date)), 'count');
 
   let health = null;
   if (!raw.lastDataDate) {
@@ -845,7 +850,7 @@ function summarise(raw, days) {
     priorReal, priorSessions: sum(prior, 'sessions'),
     delta: priorReal > 0 ? Math.round(((periodReal - priorReal) / priorReal) * 100) : null,
     spark: recent.map(r => r.real), sparkFrom: recent[0].date, sparkTo: recent[recent.length - 1].date,
-    realByCh, iomReal, messages, health, liveNow: raw.liveNow,
+    realByCh, iomReal, messages, testMessages, health, liveNow: raw.liveNow,
   };
 }
 
@@ -864,7 +869,7 @@ async function loadAllSites(isRefresh) {
       const out = { raw: null, summary: null, error: null, search: null, searchError: null };
       await Promise.all([
         runGA4Reports(site.propertyId, days)
-          .then(raw => { out.raw = raw; out.summary = summarise(raw, days); })
+          .then(raw => { out.raw = raw; out.summary = summarise(site, raw, days); })
           .catch(e => { out.error = e.message; firstError = firstError || e; }),
         runSearchConsole(site.scUrl, days)
           .then(sc => { out.search = sc; })
@@ -955,7 +960,7 @@ function renderCards() {
       </svg>
       <div class="spark-cap"><span>${days > 1 ? fmtDate(d.sparkFrom) : ''}</span><span>Real people per day</span><span>${days > 1 ? fmtDate(d.sparkTo) : ''}</span></div>
       <div class="mini-row">
-        <span>Messages sent through the website: <strong>${def.messagesTracked ? d.messages : 'not recorded'}</strong></span>
+        <span>Messages from customers: <strong>${def.messagesTracked ? d.messages : 'not recorded'}</strong>${d.testMessages ? ` (plus ${d.testMessages} of our own tests)` : ''}</span>
         <span>On the Isle of Man: <strong>${d.iomReal}</strong>${d.periodReal ? ` of ${d.periodReal}` : ''}</span>
         <span>Looking at the site right now: <strong>${d.liveNow}</strong></span>
       </div>
@@ -1067,7 +1072,7 @@ function buildInsights(def, raw, s, days, titles) {
     const bySrc = [...new Set(current.map(g => g.ch))].map(ch => ({ ch, ...stats(current.filter(g => g.ch === ch)) }));
     const top = bySrc.filter(r => r.real > 0).sort((a, b) => b.real - a.real)[0];
     if (top) out.push(`Most real people ${chInfo(top.ch).who} (${top.real} of ${sel.real}).`);
-    const readers = bySrc.filter(r => r.real >= 2 && r.activePer).sort((a, b) => b.activePer - a.activePer);
+    const readers = bySrc.filter(r => r.ch !== 'Unassigned' && r.real >= 3 && r.activePer).sort((a, b) => b.activePer - a.activePer);
     if (readers.length >= 2) {
       const hi = readers[0], lo = readers[readers.length - 1];
       out.push(`People who ${chInfo(hi.ch).who} read for longest: ${fmtDurationWords(hi.activePer)} and ${hi.pagesPer.toFixed(1)} pages each. People who ${chInfo(lo.ch).who} read for ${fmtDurationWords(lo.activePer)} and ${lo.pagesPer.toFixed(1)} pages.`);
@@ -1079,16 +1084,18 @@ function buildInsights(def, raw, s, days, titles) {
   }
 
   const ev = raw.events.filter(inSource);
-  const msgs = ev.filter(e => MESSAGE_EVENTS.includes(e.name));
+  const msgs = ev.filter(e => MESSAGE_EVENTS.includes(e.name) && !isTestDay(def, e.date));
   const msgTotal = total(msgs, 'count');
+  const testTotal = total(ev.filter(e => MESSAGE_EVENTS.includes(e.name) && isTestDay(def, e.date)), 'count');
+  const testNote = testTotal ? ` The ${plural(testTotal, 'other message')} (${[...new Set(ev.filter(e => MESSAGE_EVENTS.includes(e.name) && isTestDay(def, e.date)).map(e => e.date))].sort().map(fmtDate).join(', ')}) ${testTotal === 1 ? 'was' : 'were'} our own tests of the form, not customers.` : ''
   const starts = total(ev.filter(e => e.name === 'form_start'), 'count');
   if (!def.messagesTracked) {
     out.push(starts ? `${plural(starts, 'person', 'people')} started filling in the contact form. This website can't yet tell us whether they sent it.` : 'This website can\'t yet tell us when someone sends a message.');
   } else if (msgTotal) {
     const dates = [...new Set(msgs.map(e => e.date))].sort().map(fmtDate).join(', ');
-    out.push(`${plural(msgTotal, 'message')} sent through the contact form (${dates}).${starts > msgTotal ? ` ${starts - msgTotal} more started the form but didn't send it.` : ''}`);
+    out.push(`${plural(msgTotal, 'customer message', 'customer messages')} sent through the contact form (${dates}).${testNote}`);
   } else {
-    out.push(`Nobody sent a message through the contact form ${periodText}.${starts ? ` ${plural(starts, 'person', 'people')} started it but didn't send it.` : ''}`);
+    out.push(`No customer sent a message through the contact form ${periodText}.${testNote}`);
   }
 
   const off = iomOffsetHours();
@@ -1137,8 +1144,10 @@ function openDetail(siteId, scroll) {
   const G = current.filter(inSource);
   const sel = stats(G);
   const ev = raw.events.filter(inSource);
-  const msgs = total(ev.filter(e => MESSAGE_EVENTS.includes(e.name)), 'count');
-  const formStarts = total(ev.filter(e => e.name === 'form_start'), 'count');
+  const allMsgs = total(ev.filter(e => MESSAGE_EVENTS.includes(e.name)), 'count');
+  const testMsgs = total(ev.filter(e => MESSAGE_EVENTS.includes(e.name) && isTestDay(def, e.date)), 'count');
+  const msgs = allMsgs - testMsgs;
+  const formStarts = total(ev.filter(e => e.name === 'form_start' && !isTestDay(def, e.date)), 'count');
 
   document.getElementById('insightList').innerHTML = buildInsights(def, raw, s, days, titles).map(t => `<li>${t}</li>`).join('');
 
@@ -1149,12 +1158,12 @@ function openDetail(siteId, scroll) {
     sumTile('Time reading', fmtDuration(sel.activePer), 'each real person, on average'),
     sumTile('Pages looked at', sel.pagesPer === null ? '—' : sel.pagesPer.toFixed(1), 'each real person, on average'),
     sumTile('New visitors', pctOf(sel.firstShare), sel.firstShare === null ? 'never been before' : `never been before (${pctOf(1 - sel.firstShare)} had)`),
-    sumTile('Messages sent', def.messagesTracked ? msgs : '—', def.messagesTracked ? (formStarts ? `${plural(formStarts, 'person', 'people')} started the form` : 'through the contact form') : 'not recorded on this site'),
+    sumTile('Customer messages', def.messagesTracked ? msgs : '—', !def.messagesTracked ? 'not recorded on this site' : testMsgs ? `plus ${testMsgs} of our own tests` : formStarts ? `${plural(formStarts, 'person', 'people')} started the form` : 'through the contact form'),
   ].join('');
 
   // Source comparison (always every source)
   const msgByCh = {};
-  for (const e of raw.events) if (MESSAGE_EVENTS.includes(e.name)) msgByCh[e.ch] = (msgByCh[e.ch] || 0) + e.count;
+  for (const e of raw.events) if (MESSAGE_EVENTS.includes(e.name) && !isTestDay(def, e.date)) msgByCh[e.ch] = (msgByCh[e.ch] || 0) + e.count;
   const chKeys = [...new Set(current.map(g => g.ch))]
     .map(ch => ({ key: ch, ...stats(current.filter(g => g.ch === ch)), msgs: msgByCh[ch] || 0 }))
     .sort((a, b) => b.sessions - a.sessions);
@@ -1244,7 +1253,7 @@ function openDetail(siteId, scroll) {
   document.getElementById('enquiryList').innerHTML = (enquiryNames.length
     ? enquiryNames.map(n => {
         const t = evTotals[n];
-        const dates = Object.keys(t.byDate).sort().reverse().map(k => `${fmtDate(k)}: ${t.byDate[k]}`).join(', ');
+        const dates = Object.keys(t.byDate).sort().reverse().map(k => `${fmtDate(k)}: ${t.byDate[k]}${isTestDay(def, k) ? ' (our own tests)' : ''}`).join(', ');
         return `<li><span class="query-term">${esc(EVENT_LABELS[n])}<span class="sub">${dates}</span></span><span class="query-count">${t.total}</span></li>`;
       }).join('')
     : `<li class="empty-note">Nobody used the contact form ${periodText}.</li>`) +
