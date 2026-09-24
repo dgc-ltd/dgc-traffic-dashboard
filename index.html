@@ -254,7 +254,13 @@
       <button class="close-btn" id="closeDetail">Close</button>
     </div>
 
-    <div class="chip-bar" id="chipBar"></div>
+    <div class="chip-bar" role="group" aria-label="Date range for this breakdown">
+      <span class="chip-label">Period:</span>
+      <button class="range-btn" aria-pressed="false" data-range="today">Today</button>
+      <button class="range-btn" aria-pressed="true" data-range="7d">Last 7 days</button>
+      <button class="range-btn" aria-pressed="false" data-range="30d">Last 30 days</button>
+    </div>
+    <div class="chip-bar" id="chipBar" style="margin-top:10px;"></div>
     <div class="chip-desc" id="chipDesc"></div>
     <div class="summary-strip" id="summaryStrip"></div>
 
@@ -1169,9 +1175,9 @@ document.getElementById('closeDetail').addEventListener('click', () => {
 document.querySelectorAll('.range-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     if (btn.getAttribute('aria-pressed') === 'true') return;
-    document.querySelectorAll('.range-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
-    btn.setAttribute('aria-pressed', 'true');
     currentRange = btn.dataset.range;
+    // Two sets of buttons (top of page and top of the detail panel) stay in step.
+    document.querySelectorAll('.range-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.range === currentRange)));
     if (accessToken) loadAllSites(true);
     else if (tokenClient) tokenClient.requestAccessToken({ prompt: everConnected() ? '' : 'consent' });
   });
