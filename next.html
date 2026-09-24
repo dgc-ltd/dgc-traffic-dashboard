@@ -197,6 +197,7 @@
   table.data tr.clickable:hover td { background: color-mix(in srgb, var(--gridline) 45%, transparent); }
   table.data tr.active td { background: color-mix(in srgb, var(--gridline) 70%, transparent); }
   .cell-sub { display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+  .cell-sub.warn { color: var(--critical); }
   .swatch { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: 1px; }
   .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--gridline); color: var(--text-secondary); }
   .pill.good { background: color-mix(in srgb, var(--ch-organic) 18%, var(--surface-1)); color: var(--ch-organic); }
@@ -261,17 +262,17 @@
       <div class="panel-title">How each source of visitors behaves</div>
       <div class="panel-sub">Side-by-side comparison of people who came from different places. Click a row to filter the whole page to that group.</div>
       <div class="table-wrap"><table class="data">
-        <thead><tr><th>Where they came from</th><th class="num">Visits</th><th class="num">Real visits</th><th class="num">% real</th><th class="num">Active time<br>per visit</th><th class="num">Pages<br>per visit</th><th class="num">First-time<br>visitors</th><th class="num">Messages<br>sent</th></tr></thead>
+        <thead><tr><th>Where they came from</th><th class="num">Visits</th><th class="num">Real visits<br>(on screen)</th><th class="num">Engaged<br>(Google's count)</th><th class="num">Active time<br>per real visit</th><th class="num">Pages<br>per visit*</th><th class="num">First-time<br>visitors*</th><th class="num">Messages<br>sent</th></tr></thead>
         <tbody id="compareRows"></tbody>
       </table></div>
-      <div class="panel-note"><strong>Real visits</strong>: stayed 10+ seconds, looked at 2+ pages, or contacted you. <strong>Active time</strong>: time the page was actually on screen (a tab left open in the background doesn't count). <strong>First-time</strong>: share of visits by someone who'd never been to the site before.</div>
+      <div class="panel-note"><strong>Real visits</strong>: someone actually had the page on screen and engaged (stayed 10+ seconds, looked at 2+ pages, or contacted you). <strong>Engaged (Google's count)</strong>: Google's own figure, which also counts tabs left open in the background and bots that hold a page open without anyone looking. <strong>Active time</strong>: time the page was actually on screen. <strong>First-time</strong>: share of visits by someone who'd never been to the site before. *Worked out from real visitors only, so bots don't drag the averages down.</div>
     </div>
 
     <div class="section">
       <div class="panel-title">Pages people arrived on</div>
-      <div class="panel-sub">The first page of each visit — shows what's pulling people in, and which pages keep them reading.</div>
+      <div class="panel-sub">The first page of each visit — shows what's pulling people in, and which pages keep them reading. Active time is the best guide here: a high "engaged" count with almost no active time means bots or background tabs.</div>
       <div class="table-wrap"><table class="data">
-        <thead><tr><th>First page</th><th class="num">Visits</th><th class="num">Real</th><th class="num">Active time<br>per visit</th><th class="num">Pages<br>per visit</th><th class="num">First-time</th><th class="num">Messages</th><th id="landingMainHead">Mostly from</th></tr></thead>
+        <thead><tr><th>First page</th><th class="num">Visits</th><th class="num">Engaged<br>(Google)</th><th class="num">Active time<br>per visit</th><th class="num">Pages<br>per visit</th><th class="num">First-time</th><th class="num">Messages</th><th id="landingMainHead">Mostly from</th></tr></thead>
         <tbody id="landingRows"></tbody>
       </table></div>
     </div>
@@ -294,7 +295,7 @@
       </div>
       <div class="section">
         <div class="panel-title">Where visitors are</div>
-        <div class="panel-sub">Isle of Man broken down by town; everywhere else by country. Foreign visits that never engage are almost always bots.</div>
+        <div class="panel-sub">Isle of Man broken down by town; everywhere else by country. Foreign visits that never engage are almost always bots. Time shown is on screen, per real visit.</div>
         <ul class="query-list" id="countryList"></ul>
       </div>
     </div>
@@ -311,7 +312,7 @@
         <div class="panel-title">Phone or computer</div>
         <div class="panel-sub">What they were using — shows whether the mobile version of the site matters most.</div>
         <div class="table-wrap"><table class="data">
-          <thead><tr><th>Device</th><th class="num">Visits</th><th class="num">Real</th><th class="num">Active time<br>per visit</th><th class="num">Pages<br>per visit</th></tr></thead>
+          <thead><tr><th>Device</th><th class="num">Visits</th><th class="num">Real</th><th class="num">Active time<br>per real visit</th><th class="num">Pages<br>per visit*</th></tr></thead>
           <tbody id="deviceRows"></tbody>
         </table></div>
       </div>
@@ -349,7 +350,8 @@
   </section>
 
   <footer>
-    <p><strong>Real visits</strong> = Google Analytics "engaged sessions": the visitor stayed 10+ seconds, viewed 2+ pages, or contacted you. Visits that leave instantly are mostly bots and crawlers, so they're counted in the total but not as real.</p>
+    <p><strong>Real visits</strong> = visits Google counts as engaged (stayed 10+ seconds, viewed 2+ pages, or contacted you) <em>and</em> where the page was actually on screen. Google's own "engaged" figure is shown alongside, because it also counts tabs left open in the background and bots that hold a page open. Visits that leave instantly are mostly bots and crawlers, so they're in the total but never counted as real.</p>
+    <p>How "on screen" is worked out: visits are grouped by day, source, town, device, browser and screen size. Groups with zero seconds on screen don't count as real; a group with on-screen time but no "engaged" flag (a page left open and returned to) counts as one real visit.</p>
     <p><strong>Messages</strong> counts only contact-form sends that Google Analytics records. Opening the contact page is shown separately and is not a message.</p>
     <p>Visits from the office connection are excluded in Google Analytics, so the team browsing the sites doesn't count. Phones on mobile data or a VPN can still show up.</p>
     <p>Everything comes live from the Google Analytics 4 Data API and the Search Console API. Use the "Check in Google Analytics" link on any site to compare these numbers against Google's own screens. No IP addresses are collected or shown, because Google doesn't expose them.</p>
@@ -583,48 +585,58 @@ async function runGA4Reports(propertyId, days) {
   const range = [{ startDate: gaDate(days - 1), endDate: 'today' }];
   const q = (dims, mets, extra) => ({ dateRanges: range, dimensions: D(...dims), metrics: M(...mets), limit: 1000, ...extra });
   const visitMets = ['sessions', 'engagedSessions', 'userEngagementDuration', 'screenPageViews', 'newUsers'];
+  const visitKeys = ['sessions', 'engaged', 'eng', 'views', 'newU'];
 
   const [a, b, c, live] = await Promise.all([
     postJSON(`${base}:batchRunReports`, { requests: [
-      { dateRanges: [{ startDate: gaDate(days * 2 - 1), endDate: 'today' }], dimensions: D('date', CH), metrics: M('sessions', 'engagedSessions'), limit: 5000 },
+      // Visitor groups: fine-grained enough that a zero-screen-time bot or background tab
+      // forms its own group, so it can be excluded from "real" visits (see realOf).
+      { dateRanges: [{ startDate: gaDate(days * 2 - 1), endDate: 'today' }], dimensions: D(CH, 'date', 'country', 'city', 'deviceCategory', 'operatingSystem', 'browser', 'screenResolution'), metrics: M(...visitMets), limit: 20000 },
       q([CH, 'landingPagePlusQueryString'], visitMets),
       q([CH, 'pagePath', 'pageTitle'], ['screenPageViews', 'userEngagementDuration', 'activeUsers']),
-      q([CH, 'country', 'city'], ['sessions', 'engagedSessions', 'userEngagementDuration']),
-      q([CH, 'deviceCategory', 'operatingSystem'], ['sessions', 'engagedSessions', 'userEngagementDuration', 'screenPageViews']),
-    ] }).then(d => d.reports),
-    postJSON(`${base}:batchRunReports`, { requests: [
       q([CH, 'hour'], ['sessions', 'engagedSessions']),
       q([CH, 'dayOfWeek'], ['sessions', 'engagedSessions']),
+    ] }).then(d => d.reports),
+    postJSON(`${base}:batchRunReports`, { requests: [
       q([CH, 'sessionSourceMedium'], visitMets),
       q([CH, 'eventName', 'date'], ['eventCount'], { dimensionFilter: inList('eventName', CONTACT_EVENTS) }),
       q([CH, 'pagePath', 'eventName'], ['eventCount'], { dimensionFilter: inList('eventName', ['scroll', ...MESSAGE_EVENTS]) }),
-    ] }).then(d => d.reports),
-    postJSON(`${base}:batchRunReports`, { requests: [
       { dateRanges: [{ startDate: '2020-01-01', endDate: 'today' }], dimensions: D('date'), metrics: M('sessions'), orderBys: [{ dimension: { dimensionName: 'date' }, desc: true }], limit: 1 },
       q([CH, 'landingPagePlusQueryString', 'pagePath'], ['eventCount'], { dimensionFilter: noPageFilter }),
+    ] }).then(d => d.reports),
+    postJSON(`${base}:batchRunReports`, { requests: [
       q([CH, 'landingPagePlusQueryString'], ['eventCount'], { dimensionFilter: inList('eventName', MESSAGE_EVENTS) }),
     ] }).then(d => d.reports),
     postJSON(`${base}:runRealtimeReport`, { metrics: [{ name: 'activeUsers' }] }).catch(() => null),
   ]);
 
-  const visitKeys = ['sessions', 'real', 'eng', 'views', 'newU'];
-  const lastRow = ((c[0] && c[0].rows) || [])[0];
+  const inRange = new Set(Array.from({ length: days }, (_, n) => utcDay(n).replace(/-/g, '')));
+  const groups = toObjects(a[0], ['ch', 'date', 'country', 'city', 'device', 'os', 'browser', 'res'], visitKeys)
+    .map(g => ({ ...g, real: realOf(g), current: inRange.has(g.date) }));
+  const lastRow = ((b[3] && b[3].rows) || [])[0];
   return {
-    daily:      toObjects(a[0], ['date', 'ch'], ['sessions', 'real']),
+    groups,
     landing:    toObjects(a[1], ['ch', 'page'], visitKeys),
     pages:      toObjects(a[2], ['ch', 'path', 'title'], ['views', 'eng', 'people']),
-    geo:        toObjects(a[3], ['ch', 'country', 'city'], ['sessions', 'real', 'eng']),
-    devices:    toObjects(a[4], ['ch', 'device', 'os'], ['sessions', 'real', 'eng', 'views']),
-    hours:      toObjects(b[0], ['ch', 'hour'], ['sessions', 'real']),
-    weekdays:   toObjects(b[1], ['ch', 'dow'], ['sessions', 'real']),
-    sources:    toObjects(b[2], ['ch', 'sm'], visitKeys),
-    events:     toObjects(b[3], ['ch', 'name', 'date'], ['count']),
-    pageEvents: toObjects(b[4], ['ch', 'path', 'name'], ['count']),
-    noPage:     toObjects(c[1], ['ch', 'landing', 'path'], ['count']),
-    landingMsgs: toObjects(c[2], ['ch', 'page'], ['count']),
+    hours:      toObjects(a[3], ['ch', 'hour'], ['sessions', 'engaged']),
+    weekdays:   toObjects(a[4], ['ch', 'dow'], ['sessions', 'engaged']),
+    sources:    toObjects(b[0], ['ch', 'sm'], visitKeys),
+    events:     toObjects(b[1], ['ch', 'name', 'date'], ['count']),
+    pageEvents: toObjects(b[2], ['ch', 'path', 'name'], ['count']),
+    noPage:     toObjects(b[4], ['ch', 'landing', 'path'], ['count']),
+    landingMsgs: toObjects(c[0], ['ch', 'page'], ['count']),
     lastDataDate: lastRow ? lastRow.dimensionValues[0].value : null,
     liveNow: live && live.rows && live.rows.length ? Number(live.rows[0].metricValues[0].value) : 0,
   };
+}
+
+// Google marks a visit "engaged" after 10 seconds even if the tab was never on screen (background
+// tabs, bots holding a page open), so a group with zero on-screen time has no real visits. A group
+// with on-screen time but no engaged flag is a page left open and returned to: count one.
+function realOf(g) {
+  if (g.eng <= 0) return 0;
+  if (g.engaged > 0) return g.engaged;
+  return g.eng >= 10 ? 1 : 0;
 }
 
 async function runSearchConsole(siteUrl, days) {
@@ -686,22 +698,24 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 function summarise(raw, days) {
   // Card-level figures are always all sources.
   const byDate = {};
-  for (const r of raw.daily) {
-    const e = byDate[r.date] || (byDate[r.date] = { sessions: 0, real: 0 });
-    e.sessions += r.sessions; e.real += r.real;
+  for (const r of raw.groups) {
+    const e = byDate[r.date] || (byDate[r.date] = { sessions: 0, real: 0, engaged: 0 });
+    e.sessions += r.sessions; e.real += r.real; e.engaged += r.engaged;
   }
   const series = [];
   for (let n = days * 2 - 1; n >= 0; n--) {
     const key = utcDay(n).replace(/-/g, '');
-    series.push({ date: key, ...(byDate[key] || { sessions: 0, real: 0 }) });
+    series.push({ date: key, ...(byDate[key] || { sessions: 0, real: 0, engaged: 0 }) });
   }
   const recent = series.slice(-days), prior = series.slice(0, days);
   const sum = (arr, k) => arr.reduce((a, x) => a + x[k], 0);
   const periodReal = sum(recent, 'real'), priorReal = sum(prior, 'real');
 
+  const current = raw.groups.filter(g => g.current);
   const realByCh = {};
-  for (const r of raw.landing) realByCh[r.ch] = (realByCh[r.ch] || 0) + r.real;
-  const iomReal = total(raw.geo.filter(g => g.country === 'Isle of Man'), 'real');
+  for (const g of current) realByCh[g.ch] = (realByCh[g.ch] || 0) + g.real;
+  const iomReal = total(current.filter(g => g.country === 'Isle of Man'), 'real');
+  const ghosts = total(current, 'engaged') - total(current, 'real');
   const messages = total(raw.events.filter(e => MESSAGE_EVENTS.includes(e.name)), 'count');
 
   let health = null;
@@ -721,7 +735,7 @@ function summarise(raw, days) {
     priorReal, priorSessions: sum(prior, 'sessions'),
     delta: priorReal > 0 ? Math.round(((periodReal - priorReal) / priorReal) * 100) : null,
     spark: recent.map(r => r.real),
-    realByCh, iomReal, messages, health, liveNow: raw.liveNow,
+    realByCh, iomReal, ghosts: Math.max(ghosts, 0), messages, health, liveNow: raw.liveNow,
   };
 }
 
@@ -817,7 +831,7 @@ function renderCards() {
           ${deltaHtml}
         </div>
       </div>
-      <div class="stat-sub">${secondTotal} total visits ${days === 1 ? 'yesterday' : 'in this period'} — ${secondTotal - secondReal} didn't engage (mostly bots and instant exits)</div>
+      <div class="stat-sub">${secondTotal} total visits ${days === 1 ? 'yesterday' : 'in this period'}. The other ${Math.max(secondTotal - secondReal, 0)} were bots, instant exits or tabs nobody looked at${days > 1 && d.ghosts > 0 ? ` (incl. ${d.ghosts} Google counts as "engaged" that were never on screen)` : ''}.</div>
       <svg class="spark" viewBox="0 0 280 40" preserveAspectRatio="none" aria-label="Real visits per day">
         <path class="spark-area" d="${area}" fill="${def.color}"></path>
         <path class="spark-line" d="${line}" stroke="${def.color}"></path>
@@ -868,7 +882,7 @@ function pageCell(path, titles, noPageInfo) {
 }
 
 function renderChips(raw) {
-  const chTotals = sumBy(raw.landing, r => r.ch, ['sessions']).sort((a, b) => b.sessions - a.sessions);
+  const chTotals = sumBy(raw.groups.filter(g => g.current), r => r.ch, ['sessions']).sort((a, b) => b.sessions - a.sessions);
   if (sourceFilter !== 'all' && !chTotals.some(c => c.key === sourceFilter)) sourceFilter = 'all';
   const chip = (id, label, n) => `<button class="chip" data-ch="${esc(id)}" aria-pressed="${sourceFilter === id}">${esc(label)}${n !== undefined ? ` <span class="muted">${n}</span>` : ''}</button>`;
   document.getElementById('chipBar').innerHTML = `<span class="chip-label">Show visitors from:</span>` +
@@ -891,11 +905,11 @@ function barChart(buckets, labels, axisEvery, color, titleFn) {
   const bars = buckets.map((b, i) => `
     <div class="bar" title="${esc(titleFn(i, b))}">
       <span class="tot" style="height:${(b.sessions / max * 100).toFixed(1)}%"></span>
-      <span class="real" style="height:${(b.real / max * 100).toFixed(1)}%;background:${color}"></span>
+      <span class="real" style="height:${(b.engaged / max * 100).toFixed(1)}%;background:${color}"></span>
     </div>`).join('');
   const axis = labels.map((l, i) => `<span>${i % axisEvery === 0 ? l : ''}</span>`).join('');
   return `<div class="bars">${bars}</div><div class="bar-axis">${axis}</div>
-    <div class="legend"><span><span class="swatch" style="background:${color}"></span>Real visits</span><span><span class="swatch" style="background:var(--gridline)"></span>Didn't engage</span></div>`;
+    <div class="legend"><span><span class="swatch" style="background:${color}"></span>Engaged (Google's count)</span><span><span class="swatch" style="background:var(--gridline)"></span>Didn't engage</span></div>`;
 }
 
 function openDetail(siteId, scroll) {
@@ -914,44 +928,65 @@ function openDetail(siteId, scroll) {
 
   renderChips(raw);
   const titles = titleMap(raw.pages);
-  const L = raw.landing.filter(inSource);
-  const visits = total(L, 'sessions'), real = total(L, 'real'), eng = total(L, 'eng'), views = total(L, 'views'), newU = total(L, 'newU');
+
+  // Behaviour averages use only groups with real visits, so bots don't drag them down.
+  const stats = (rows) => {
+    const R = rows.filter(g => g.real > 0);
+    return {
+      sessions: total(rows, 'sessions'), real: total(rows, 'real'), engaged: total(rows, 'engaged'),
+      activePer: ratio(total(R, 'eng'), total(R, 'real')),
+      pagesPer: ratio(total(R, 'views'), total(R, 'sessions')),
+      firstShare: ratio(total(R, 'newU'), total(R, 'sessions')),
+    };
+  };
+  const ghostNote = (engaged, real) => {
+    const n = engaged - real;
+    return n >= 2 ? `<span class="cell-sub warn">${n} of these Google counts as engaged were never on screen: bots or background tabs.</span>` : '';
+  };
+  const lowActiveNote = (engaged, eng) => (engaged >= 3 && eng / engaged < 5
+    ? '<span class="cell-sub warn">Google counts these as engaged, but they spent almost no time on screen: likely bots or background tabs.</span>' : '');
+  const pctOf = (share) => (share === null ? '—' : Math.round(share * 100) + '%');
+
+  const current = raw.groups.filter(g => g.current);
+  const G = current.filter(inSource);
+  const sel = stats(G);
   const ev = raw.events.filter(inSource);
   const msgs = total(ev.filter(e => MESSAGE_EVENTS.includes(e.name)), 'count');
   const formStarts = total(ev.filter(e => e.name === 'form_start'), 'count');
 
   // Summary strip
   document.getElementById('summaryStrip').innerHTML = [
-    sumTile('Visits', visits, 'every visit, bots included'),
-    sumTile('Real visits', real, `${pctText(real, visits)} of all visits`),
-    sumTile('Active time', fmtDuration(ratio(eng, visits)), 'on screen, per visit'),
-    sumTile('Active time (real)', fmtDuration(ratio(eng, real)), 'per real visit'),
-    sumTile('Pages per visit', perText(views, visits), 'how far they browse'),
-    sumTile('First-time', pctText(newU, visits), `${pctText(Math.max(visits - newU, 0), visits)} had been before`),
-    sumTile('Messages sent', msgs, formStarts ? `${formStarts} started the form` : 'contact-form sends'),
+    sumTile('Visits', sel.sessions, 'every visit, bots included'),
+    sumTile('Real visits', sel.real, `${pctText(sel.real, sel.sessions)} of visits: page actually on screen`),
+    sumTile('Engaged (Google)', sel.engaged, sel.engaged > sel.real ? `${sel.engaged - sel.real} of these were never on screen` : 'Google\'s own count'),
+    sumTile('Active time', fmtDuration(sel.activePer), 'on screen, per real visit'),
+    sumTile('Pages per visit', sel.pagesPer === null ? '—' : sel.pagesPer.toFixed(1), 'real visitors only'),
+    sumTile('First-time', pctOf(sel.firstShare), sel.firstShare === null ? 'real visitors only' : `${pctOf(1 - sel.firstShare)} had been before`),
+    sumTile('Messages sent', msgs, formStarts ? `${plural(formStarts, 'form')} started` : 'contact-form sends'),
   ].join('');
 
   // Source comparison (always all sources)
-  const byCh = sumBy(raw.landing, r => r.ch, ['sessions', 'real', 'eng', 'views', 'newU']).sort((a, b) => b.sessions - a.sessions);
   const msgByCh = {};
   for (const e of raw.events) if (MESSAGE_EVENTS.includes(e.name)) msgByCh[e.ch] = (msgByCh[e.ch] || 0) + e.count;
+  const chKeys = [...new Set(current.map(g => g.ch))]
+    .map(ch => ({ key: ch, ...stats(current.filter(g => g.ch === ch)), msgs: msgByCh[ch] || 0 }))
+    .sort((a, b) => b.sessions - a.sessions);
   const compareRow = (r, label, extraClass) => `
     <tr class="${extraClass}" data-ch="${esc(r.key)}">
-      <td>${label}</td>
+      <td>${label}${ghostNote(r.engaged, r.real)}</td>
       <td class="num">${r.sessions}</td>
-      <td class="num">${r.real}</td>
-      <td class="num">${pctText(r.real, r.sessions)}</td>
-      <td class="num">${fmtDuration(ratio(r.eng, r.sessions))}</td>
-      <td class="num">${perText(r.views, r.sessions)}</td>
-      <td class="num">${pctText(r.newU, r.sessions)}</td>
+      <td class="num">${r.real} <span class="muted">(${pctText(r.real, r.sessions)})</span></td>
+      <td class="num">${r.engaged}</td>
+      <td class="num">${fmtDuration(r.activePer)}</td>
+      <td class="num">${r.pagesPer === null ? '—' : r.pagesPer.toFixed(1)}</td>
+      <td class="num">${pctOf(r.firstShare)}</td>
       <td class="num">${r.msgs > 0 ? `<span class="pill good">${r.msgs}</span>` : '—'}</td>
     </tr>`;
-  const allRow = { key: 'all', sessions: total(byCh, 'sessions'), real: total(byCh, 'real'), eng: total(byCh, 'eng'), views: total(byCh, 'views'), newU: total(byCh, 'newU'), msgs: Object.values(msgByCh).reduce((a, n) => a + n, 0) };
-  document.getElementById('compareRows').innerHTML = byCh.length
-    ? byCh.map(r => compareRow({ ...r, msgs: msgByCh[r.key] || 0 },
+  document.getElementById('compareRows').innerHTML = chKeys.length
+    ? chKeys.map(r => compareRow(r,
         `<span class="swatch" style="background:${chInfo(r.key).color}"></span>${esc(chInfo(r.key).label)}<span class="cell-sub">${esc(chInfo(r.key).desc)}</span>`,
         'clickable' + (sourceFilter === r.key ? ' active' : ''))).join('') +
-      compareRow(allRow, 'All sources', 'total clickable' + (sourceFilter === 'all' ? ' active' : ''))
+      compareRow({ key: 'all', ...stats(current), msgs: Object.values(msgByCh).reduce((a, n) => a + n, 0) }, 'All sources', 'total clickable' + (sourceFilter === 'all' ? ' active' : ''))
     : '<tr><td colspan="8" class="empty-note">No visits in this period.</td></tr>';
   document.querySelectorAll('#compareRows tr.clickable').forEach(tr => tr.addEventListener('click', () => {
     sourceFilter = tr.dataset.ch;
@@ -968,14 +1003,14 @@ function openDetail(siteId, scroll) {
     .map(([p]) => (p === '/' ? 'Home page' : (titles[p] ? `${titles[p]} (${p})` : p)));
   const msgByLanding = {};
   for (const r of raw.landingMsgs.filter(inSource)) msgByLanding[r.page] = (msgByLanding[r.page] || 0) + r.count;
-  const landing = sumBy(L, r => r.page, ['sessions', 'real', 'eng', 'views', 'newU']).sort((a, b) => b.sessions - a.sessions).slice(0, 15);
+  const landing = sumBy(raw.landing.filter(inSource), r => r.page, ['sessions', 'engaged', 'eng', 'views', 'newU']).sort((a, b) => b.sessions - a.sessions).slice(0, 15);
   document.getElementById('landingMainHead').style.display = sourceFilter === 'all' ? '' : 'none';
   document.getElementById('landingRows').innerHTML = landing.length
     ? landing.map(r => `
       <tr>
-        <td>${pageCell(r.key, titles, noPagePaths(r.key))}</td>
+        <td>${pageCell(r.key, titles, noPagePaths(r.key))}${lowActiveNote(r.engaged, r.eng)}</td>
         <td class="num">${r.sessions}</td>
-        <td class="num">${r.real}</td>
+        <td class="num">${r.engaged}</td>
         <td class="num">${fmtDuration(ratio(r.eng, r.sessions))}</td>
         <td class="num">${perText(r.views, r.sessions)}</td>
         <td class="num">${pctText(r.newU, r.sessions)}</td>
@@ -1014,6 +1049,7 @@ function openDetail(siteId, scroll) {
     t.byDate[e.date] = (t.byDate[e.date] || 0) + e.count;
   }
   const enquiryNames = CONTACT_EVENTS.filter(n => evTotals[n]);
+  const abandoned = Math.max(formStarts - msgs, 0);
   document.getElementById('enquiryList').innerHTML = (enquiryNames.length
     ? enquiryNames.map(n => {
         const t = evTotals[n];
@@ -1021,38 +1057,40 @@ function openDetail(siteId, scroll) {
         return `<li><span class="query-term">${esc(EVENT_LABELS[n])}<span class="sub">${dates}</span></span><span class="query-count">${t.total}</span></li>`;
       }).join('')
     : `<li class="empty-note">No contact-form activity recorded ${periodText}${sourceFilter === 'all' ? '' : ' from this source'}.</li>`) +
-    (formStarts ? `<li><span class="query-term muted">Started the form but didn't send<span class="sub">Began typing into the contact form and left without sending.</span></span><span class="query-count">${Math.max(formStarts - msgs, 0)}</span></li>` : '');
+    (formStarts ? `<li><span class="query-term">Started the form but didn't send<span class="sub">${abandoned ? 'Began typing into the contact form and left without sending.' : 'Everyone who started the form sent it.'}</span></span><span class="query-count">${abandoned}</span></li>` : '');
 
   // Where
-  const geoRows = sumBy(raw.geo.filter(inSource), r => (r.country === 'Isle of Man' ? `Isle of Man · ${r.city === '(not set)' ? 'town unknown' : r.city}` : r.country === '(not set)' ? 'Location unknown' : r.country),
-    ['sessions', 'real', 'eng']).sort((a, b) => (b.key.startsWith('Isle of Man') - a.key.startsWith('Isle of Man')) || b.sessions - a.sessions).slice(0, 14);
+  const placeOf = (g) => (g.country === 'Isle of Man' ? `Isle of Man · ${g.city === '(not set)' ? 'town unknown' : g.city}` : g.country === '(not set)' ? 'Location unknown' : g.country);
+  const geoRows = [...new Set(G.map(placeOf))].map(key => ({ key, ...stats(G.filter(g => placeOf(g) === key)) }))
+    .sort((a, b) => (b.key.startsWith('Isle of Man') - a.key.startsWith('Isle of Man')) || b.real - a.real || b.sessions - a.sessions).slice(0, 14);
   document.getElementById('countryList').innerHTML = geoRows.length
-    ? geoRows.map(c => `<li><span class="query-term">${esc(c.key)}${c.key === 'Location unknown' ? '<span class="sub">Google couldn\'t place the visitor — typical of bots and data-centre traffic.</span>' : ''}</span><span class="query-count">${c.real} real <span class="muted">/ ${c.sessions} visits · ${fmtDuration(ratio(c.eng, c.sessions))} each</span></span></li>`).join('')
+    ? geoRows.map(c => `<li><span class="query-term">${esc(c.key)}${c.key === 'Location unknown' ? '<span class="sub">Google couldn\'t place the visitor, which is typical of bots and data-centre traffic.</span>' : ''}${ghostNote(c.engaged, c.real)}</span><span class="query-count">${c.real} real <span class="muted">/ ${plural(c.sessions, 'visit')}${c.real ? ` · ${fmtDuration(c.activePer)} each` : ''}</span></span></li>`).join('')
     : '<li class="empty-note">No visits from this source in this period.</li>';
 
   // When
   const off = iomOffsetHours();
-  const hourBuckets = Array.from({ length: 24 }, () => ({ sessions: 0, real: 0 }));
+  const hourBuckets = Array.from({ length: 24 }, () => ({ sessions: 0, engaged: 0 }));
   for (const r of raw.hours.filter(inSource)) {
     const h = (Number(r.hour) + off) % 24;
-    hourBuckets[h].sessions += r.sessions; hourBuckets[h].real += r.real;
+    hourBuckets[h].sessions += r.sessions; hourBuckets[h].engaged += r.engaged;
   }
   const hourLabels = hourBuckets.map((_, i) => String(i).padStart(2, '0'));
   document.getElementById('hourChart').innerHTML = barChart(hourBuckets, hourLabels, 3, def.color,
-    (i, b) => `${hourLabels[i]}:00–${String((i + 1) % 24).padStart(2, '0')}:00 — ${plural(b.sessions, 'visit')}, ${b.real} real`);
+    (i, b) => `${hourLabels[i]}:00–${String((i + 1) % 24).padStart(2, '0')}:00, ${plural(b.sessions, 'visit')}, ${b.engaged} engaged`);
   const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const dayBuckets = Array.from({ length: 7 }, () => ({ sessions: 0, real: 0 }));
-  for (const r of raw.weekdays.filter(inSource)) { dayBuckets[+r.dow].sessions += r.sessions; dayBuckets[+r.dow].real += r.real; }
+  const dayBuckets = Array.from({ length: 7 }, () => ({ sessions: 0, engaged: 0 }));
+  for (const r of raw.weekdays.filter(inSource)) { dayBuckets[+r.dow].sessions += r.sessions; dayBuckets[+r.dow].engaged += r.engaged; }
   const monFirst = [1, 2, 3, 4, 5, 6, 0];
   document.getElementById('dayChart').innerHTML = barChart(monFirst.map(i => dayBuckets[i]), monFirst.map(i => DAY_NAMES[i]), 1, def.color,
-    (i, b) => `${DAY_NAMES[monFirst[i]]} — ${plural(b.sessions, 'visit')}, ${b.real} real`) +
+    (i, b) => `${DAY_NAMES[monFirst[i]]}, ${plural(b.sessions, 'visit')}, ${b.engaged} engaged`) +
     (days < 14 ? '<div class="panel-note">Pick "Last 30 days" for a fair day-of-week comparison.</div>' : '');
 
   // Devices
-  const devices = sumBy(raw.devices.filter(inSource), r => `${r.device === 'mobile' ? 'Phone' : r.device === 'desktop' ? 'Computer' : r.device === 'tablet' ? 'Tablet' : r.device} · ${r.os}`,
-    ['sessions', 'real', 'eng', 'views']).sort((a, b) => b.sessions - a.sessions).slice(0, 10);
+  const deviceOf = (g) => `${g.device === 'mobile' ? 'Phone' : g.device === 'desktop' ? 'Computer' : g.device === 'tablet' ? 'Tablet' : g.device} · ${g.os === '(not set)' ? 'system unknown' : g.os}`;
+  const devices = [...new Set(G.map(deviceOf))].map(key => ({ key, ...stats(G.filter(g => deviceOf(g) === key)) }))
+    .sort((a, b) => b.sessions - a.sessions).slice(0, 10);
   document.getElementById('deviceRows').innerHTML = devices.length
-    ? devices.map(r => `<tr><td>${esc(r.key)}</td><td class="num">${r.sessions}</td><td class="num">${r.real}</td><td class="num">${fmtDuration(ratio(r.eng, r.sessions))}</td><td class="num">${perText(r.views, r.sessions)}</td></tr>`).join('')
+    ? devices.map(r => `<tr><td>${esc(r.key)}${ghostNote(r.engaged, r.real)}</td><td class="num">${r.sessions}</td><td class="num">${r.real}</td><td class="num">${fmtDuration(r.activePer)}</td><td class="num">${r.pagesPer === null ? '—' : r.pagesPer.toFixed(1)}</td></tr>`).join('')
     : '<tr><td colspan="5" class="empty-note">No visits from this source in this period.</td></tr>';
 
   // Exact sources
@@ -1061,11 +1099,11 @@ function openDetail(siteId, scroll) {
     'google / organic': 'Free Google search result.',
     'bing / organic': 'Free Bing search result.',
     'google / cpc': 'Google Ads click.',
-    '(not set)': 'Google couldn\'t record a source — usually a page left open and returned to, or a bot.',
+    '(not set)': 'Google couldn\'t record a source, usually a page left open and returned to, or a bot.',
   };
-  const sources = sumBy(raw.sources.filter(inSource), r => r.sm, ['sessions', 'real', 'eng']).sort((a, b) => b.sessions - a.sessions).slice(0, 12);
+  const sources = sumBy(raw.sources.filter(inSource), r => r.sm, ['sessions', 'engaged', 'eng']).sort((a, b) => b.sessions - a.sessions).slice(0, 12);
   document.getElementById('sourceList').innerHTML = sources.length
-    ? sources.map(r => `<li><span class="query-term">${esc(r.key)}${SM_NOTES[r.key] ? `<span class="sub">${esc(SM_NOTES[r.key])}</span>` : r.key.includes('referral') ? '<span class="sub">A link on that website.</span>' : ''}</span><span class="query-count">${r.real} real <span class="muted">/ ${r.sessions} visits</span></span></li>`).join('')
+    ? sources.map(r => `<li><span class="query-term">${esc(r.key)}${SM_NOTES[r.key] ? `<span class="sub">${esc(SM_NOTES[r.key])}</span>` : r.key.includes('referral') ? '<span class="sub">A link on that website.</span>' : ''}${lowActiveNote(r.engaged, r.eng)}</span><span class="query-count">${r.engaged} engaged <span class="muted">/ ${plural(r.sessions, 'visit')} · ${fmtDuration(ratio(r.eng, r.sessions))} each</span></span></li>`).join('')
     : '<li class="empty-note">No visits from this source in this period.</li>';
 
   renderSearch(s, days);
