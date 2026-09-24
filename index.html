@@ -79,16 +79,10 @@
   .signed-in-as { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
 
   .status-banner {
-    margin: 16px 0 24px;
-    padding: 12px 16px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface-1);
-    font-size: 13px;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    margin: 16px 0 24px; padding: 12px 16px;
+    border: 1px solid var(--border); border-radius: 10px; background: var(--surface-1);
+    font-size: 13px; color: var(--text-secondary);
+    display: flex; align-items: center; gap: 10px;
   }
   .status-banner strong { color: var(--text-primary); }
   .status-banner.err { border-color: color-mix(in srgb, var(--critical) 40%, var(--border)); }
@@ -98,12 +92,12 @@
   .dot.err { background: var(--critical); }
 
   .range-row { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
-  .range-btn {
+  .range-btn, .chip {
     font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px;
     border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary);
     cursor: pointer;
   }
-  .range-btn[aria-pressed="true"] { background: var(--text-primary); color: var(--page); border-color: var(--text-primary); }
+  .range-btn[aria-pressed="true"], .chip[aria-pressed="true"] { background: var(--text-primary); color: var(--page); border-color: var(--text-primary); }
   .range-btn:disabled { opacity: .5; cursor: default; }
   .last-updated { margin-left: auto; font-size: 12px; color: var(--text-muted); }
 
@@ -111,12 +105,8 @@
   @media (max-width: 860px) { .sites { grid-template-columns: 1fr; } }
 
   .site-card {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px 18px 14px;
-    cursor: pointer;
-    min-height: 150px;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px 18px 14px; cursor: pointer; min-height: 150px;
   }
   .site-card.selected { border-color: var(--text-secondary); }
   .site-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
@@ -136,9 +126,9 @@
   .stat-tile .stat-value { font-size: 28px; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
   .stat-tile .stat-delta { font-size: 12px; color: var(--success); font-variant-numeric: tabular-nums; }
   .stat-tile .stat-delta.neg { color: var(--text-muted); }
-  .stat-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  .stat-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4; }
 
-  .mini-row { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
+  .mini-row { display: flex; gap: 6px 16px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
   .mini-row strong { color: var(--text-primary); font-variant-numeric: tabular-nums; }
 
   svg.spark { width: 100%; height: 40px; display: block; margin-top: 6px; }
@@ -150,16 +140,13 @@
   .card-note.err { color: var(--critical); }
   .skeleton { opacity: .5; }
 
+  /* Detail */
   .detail {
-    display: none;
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px 20px 20px;
-    margin-bottom: 28px;
+    display: none; background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px 20px; margin-bottom: 28px;
   }
   .detail.open { display: block; }
-  .detail-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .detail-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
   .detail-head h2 { font-size: 16px; margin: 0; }
   .detail-links { display: flex; gap: 14px; font-size: 12px; flex-wrap: wrap; }
   .detail-links a { color: var(--text-secondary); }
@@ -168,39 +155,66 @@
     color: var(--text-secondary); border-radius: 8px; padding: 5px 10px; cursor: pointer;
   }
 
-  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .chip-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .chip-bar .chip-label { font-size: 12px; color: var(--text-muted); margin-right: 2px; }
+  .chip-desc { font-size: 12px; color: var(--text-muted); margin: 4px 0 16px; min-height: 16px; line-height: 1.45; }
+
+  .summary-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px; margin-bottom: 8px; }
+  .sum-tile { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .sum-tile .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); }
+  .sum-tile .sum-value { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .sum-tile .sum-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.35; }
+
+  .section { margin-top: 26px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
   @media (max-width: 780px) { .detail-grid { grid-template-columns: 1fr; } }
 
-  .panel-title { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 22px 0 10px; }
-  .detail-grid > div > .panel-title:first-child { margin-top: 0; }
-  .panel-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.45; }
-
-  .chan-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
-  .chan-label { width: 104px; flex: none; color: var(--text-secondary); }
-  .chan-track { flex: 1; height: 10px; background: var(--gridline); border-radius: 4px; overflow: hidden; }
-  .chan-fill { display: block; height: 100%; border-radius: 4px; }
-  .chan-value { width: 96px; flex: none; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); font-size: 12px; }
+  .panel-title { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-primary); font-weight: 600; margin-bottom: 3px; }
+  .panel-sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.45; }
+  .panel-note { font-size: 12px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
+  .panel-note strong { color: var(--text-secondary); font-weight: 600; }
 
   .query-list { list-style: none; margin: 0; padding: 0; }
   .query-list li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--gridline); font-size: 13px; }
   .query-list li:last-child { border-bottom: none; }
   .query-term { color: var(--text-primary); overflow-wrap: anywhere; }
+  .query-term .sub { display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
   .query-count { color: var(--text-secondary); font-variant-numeric: tabular-nums; flex: none; text-align: right; }
-  .query-count .muted { color: var(--text-muted); }
+  .muted { color: var(--text-muted); }
 
   .table-wrap { overflow-x: auto; }
-  table.data { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
   table.data th {
     text-align: left; font-weight: 500; font-size: 11px; text-transform: uppercase;
-    letter-spacing: .03em; color: var(--text-muted); padding: 6px 8px; border-bottom: 1px solid var(--baseline); white-space: nowrap;
+    letter-spacing: .03em; color: var(--text-muted); padding: 6px 8px; border-bottom: 1px solid var(--baseline); vertical-align: bottom;
   }
-  table.data th.num, table.data td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.data th.num, table.data td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   table.data td { padding: 8px; border-bottom: 1px solid var(--gridline); vertical-align: top; }
-  table.data td:first-child { overflow-wrap: anywhere; }
+  table.data td:first-child { overflow-wrap: anywhere; min-width: 160px; }
   table.data tr:last-child td { border-bottom: none; }
+  table.data tr.total td { border-top: 1px solid var(--baseline); font-weight: 600; }
+  table.data tr.clickable { cursor: pointer; }
+  table.data tr.clickable:hover td { background: color-mix(in srgb, var(--gridline) 45%, transparent); }
+  table.data tr.active td { background: color-mix(in srgb, var(--gridline) 70%, transparent); }
+  .cell-sub { display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+  .cell-sub.warn { color: var(--critical); }
+  .swatch { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: 1px; }
   .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--gridline); color: var(--text-secondary); }
   .pill.good { background: color-mix(in srgb, var(--ch-organic) 18%, var(--surface-1)); color: var(--ch-organic); }
   .empty-note { font-size: 13px; color: var(--text-muted); padding: 8px 0; }
+
+  /* Hour / weekday bars */
+  .bars { display: flex; align-items: flex-end; gap: 2px; height: 90px; border-bottom: 1px solid var(--baseline); }
+  .bar { flex: 1; position: relative; height: 100%; display: flex; align-items: flex-end; }
+  .bar .tot, .bar .real { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 3px 3px 0 0; }
+  .bar .tot { background: var(--gridline); }
+  .bar:hover .tot { background: var(--baseline); }
+  .bar-axis { display: flex; gap: 2px; font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+  .bar-axis span { flex: 1; text-align: center; }
+  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+  .not-tracked li { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; line-height: 1.45; }
+  .not-tracked { padding-left: 18px; margin: 0; }
 
   footer { margin-top: 30px; font-size: 12px; color: var(--text-muted); line-height: 1.55; }
   footer p { margin: 0 0 8px; }
@@ -239,45 +253,107 @@
       <div class="detail-links" id="detailLinks"></div>
       <button class="close-btn" id="closeDetail">Close</button>
     </div>
+
+    <div class="chip-bar" id="chipBar"></div>
+    <div class="chip-desc" id="chipDesc"></div>
+    <div class="summary-strip" id="summaryStrip"></div>
+
+    <div class="section">
+      <div class="panel-title">How each source of visitors behaves</div>
+      <div class="panel-sub">Side-by-side comparison of people who came from different places. Click a row to filter the whole page to that group.</div>
+      <div class="table-wrap"><table class="data">
+        <thead><tr><th>Where they came from</th><th class="num">Visits</th><th class="num">Real visits<br>(on screen)</th><th class="num">Engaged<br>(Google's count)</th><th class="num">Active time<br>per real visit</th><th class="num">Pages<br>per visit*</th><th class="num">First-time<br>visitors*</th><th class="num">Messages<br>sent</th></tr></thead>
+        <tbody id="compareRows"></tbody>
+      </table></div>
+      <div class="panel-note"><strong>Real visits</strong>: someone actually had the page on screen and engaged (stayed 10+ seconds, looked at 2+ pages, or contacted you). <strong>Engaged (Google's count)</strong>: Google's own figure, which also counts tabs left open in the background and bots that hold a page open without anyone looking. <strong>Active time</strong>: time the page was actually on screen. <strong>First-time</strong>: share of visits by someone who'd never been to the site before. *Worked out from real visitors only, so bots don't drag the averages down.</div>
+    </div>
+
+    <div class="section">
+      <div class="panel-title">Pages people arrived on</div>
+      <div class="panel-sub">The first page of each visit — shows what's pulling people in, and which pages keep them reading. Active time is the best guide here: a high "engaged" count with almost no active time means bots or background tabs.</div>
+      <div class="table-wrap"><table class="data">
+        <thead><tr><th>First page</th><th class="num">Visits</th><th class="num">Engaged<br>(Google)</th><th class="num">Active time<br>per visit</th><th class="num">Pages<br>per visit</th><th class="num">First-time</th><th class="num">Messages</th><th id="landingMainHead">Mostly from</th></tr></thead>
+        <tbody id="landingRows"></tbody>
+      </table></div>
+    </div>
+
+    <div class="section">
+      <div class="panel-title">Every page they looked at</div>
+      <div class="panel-sub">All page views, not just the first page — which content actually gets read.</div>
+      <div class="table-wrap"><table class="data">
+        <thead><tr><th>Page</th><th class="num">Views</th><th class="num">People</th><th class="num">Active time<br>per view</th><th class="num">Read to<br>the bottom</th><th class="num">Messages<br>sent here</th></tr></thead>
+        <tbody id="pageRows"></tbody>
+      </table></div>
+      <div class="panel-note"><strong>Read to the bottom</strong>: share of views where the visitor scrolled at least 90% of the way down the page.</div>
+    </div>
+
     <div class="detail-grid">
-      <div>
+      <div class="section">
         <div class="panel-title">Enquiries</div>
+        <div class="panel-sub">Contact-form activity Google Analytics recorded, with dates.</div>
         <ul class="query-list" id="enquiryList"></ul>
-
+      </div>
+      <div class="section">
         <div class="panel-title">Where visitors are</div>
+        <div class="panel-sub">Isle of Man broken down by town; everywhere else by country. Foreign visits that never engage are almost always bots. Time shown is on screen, per real visit.</div>
         <ul class="query-list" id="countryList"></ul>
+      </div>
+    </div>
 
-        <div class="panel-title">How they arrived</div>
-        <div id="channelBars"></div>
-        <div class="panel-note">Direct = typed the address, a bookmark, or a bot. Organic Search = a normal Google result. Paid Search = clicked a Google Ads advert. Referral = a link on another website.</div>
+    <div class="detail-grid">
+      <div class="section">
+        <div class="panel-title">When they visit (Isle of Man time)</div>
+        <div class="panel-sub">Visits by hour of the day — useful for when to run adverts and when to answer the phone.</div>
+        <div id="hourChart"></div>
+        <div class="panel-title" style="margin-top:18px;">By day of the week</div>
+        <div id="dayChart"></div>
+      </div>
+      <div class="section">
+        <div class="panel-title">Phone or computer</div>
+        <div class="panel-sub">What they were using — shows whether the mobile version of the site matters most.</div>
+        <div class="table-wrap"><table class="data">
+          <thead><tr><th>Device</th><th class="num">Visits</th><th class="num">Real</th><th class="num">Active time<br>per real visit</th><th class="num">Pages<br>per visit*</th></tr></thead>
+          <tbody id="deviceRows"></tbody>
+        </table></div>
+      </div>
+    </div>
 
+    <div class="detail-grid">
+      <div class="section">
         <div class="panel-title">Exactly where they came from</div>
+        <div class="panel-sub">The precise source Google recorded (website / type) — more detail than the groups above.</div>
         <ul class="query-list" id="sourceList"></ul>
       </div>
-      <div>
-        <div class="panel-title">What people searched on Google</div>
-        <div class="table-wrap">
-          <table class="data">
-            <thead><tr><th>Search</th><th class="num">Shown</th><th class="num">Clicked</th><th class="num">Position</th></tr></thead>
-            <tbody id="termRows"></tbody>
-          </table>
-        </div>
+      <div class="section">
+        <div class="panel-title">Google search (free results only)</div>
+        <div class="panel-sub" id="searchSub">From Google Search Console. Not affected by the filter above — it only covers free Google results.</div>
+        <div class="summary-strip" id="searchStrip"></div>
+        <div class="panel-title" style="margin-top:14px;">Searches that showed the site</div>
+        <div class="table-wrap"><table class="data">
+          <thead><tr><th>Search typed</th><th class="num">Shown</th><th class="num">Clicked</th><th class="num">Position</th></tr></thead>
+          <tbody id="termRows"></tbody>
+        </table></div>
         <div class="panel-note" id="termNote"></div>
-
-        <div class="panel-title">Pages people landed on</div>
-        <div class="table-wrap">
-          <table class="data">
-            <thead><tr><th>Page</th><th class="num">Visits</th><th class="num">Real</th><th class="num">Avg. time</th><th class="num">New</th><th class="num">Messages</th></tr></thead>
-            <tbody id="landingRows"></tbody>
-          </table>
-        </div>
+        <div class="panel-title" style="margin-top:18px;">Pages Google sends people to</div>
+        <div class="table-wrap"><table class="data">
+          <thead><tr><th>Page</th><th class="num">Shown</th><th class="num">Clicked</th><th class="num">Position</th></tr></thead>
+          <tbody id="gPageRows"></tbody>
+        </table></div>
       </div>
+    </div>
+
+    <div class="section">
+      <div class="panel-title">Not recorded yet</div>
+      <div class="panel-sub">Things this dashboard can't show because nothing is measuring them yet.</div>
+      <ul class="not-tracked" id="notTracked"></ul>
     </div>
   </section>
 
   <footer>
-    <p><strong>Real visits</strong> = Google Analytics "engaged sessions": the visitor stayed 10+ seconds, viewed 2+ pages, or contacted you. Visits that leave instantly are mostly bots and crawlers (they tend to show up as "direct" from the USA, Asia or "(not set)"), so they're counted in the total but not as real.</p>
+    <p><strong>Real visits</strong> = visits Google counts as engaged (stayed 10+ seconds, viewed 2+ pages, or contacted you) <em>and</em> where the page was actually on screen. Google's own "engaged" figure is shown alongside, because it also counts tabs left open in the background and bots that hold a page open. Visits that leave instantly are mostly bots and crawlers, so they're in the total but never counted as real.</p>
+    <p>How "on screen" is worked out: visits are grouped by day, source, town, device, browser and screen size. Groups with zero seconds on screen don't count as real; a group with on-screen time but no "engaged" flag (a page left open and returned to) counts as one real visit.</p>
     <p><strong>Messages</strong> counts only contact-form sends that Google Analytics records. Opening the contact page is shown separately and is not a message.</p>
+    <p>Visits from the office connection are excluded in Google Analytics, so the team browsing the sites doesn't count. Phones on mobile data or a VPN can still show up.</p>
     <p>Everything comes live from the Google Analytics 4 Data API and the Search Console API. Use the "Check in Google Analytics" link on any site to compare these numbers against Google's own screens. No IP addresses are collected or shown, because Google doesn't expose them.</p>
   </footer>
 
@@ -293,10 +369,34 @@ const EVER_CONNECTED_KEY = 'dgc_dash_ever_connected_v1';
 // Pinned, not discovered by domain: the account holds more than one property mentioning dgc.im,
 // and domain matching silently picked an empty one. Verified 24 Sep 2026 against each site's live tag.
 const SITE_DEFS = [
-  { id: 'dgc', name: 'DGC Ltd', domain: 'dgc.im', color: 'var(--site-dgc)', propertyId: '477291287', scUrl: 'sc-domain:dgc.im' },
-  { id: 'manx', name: 'Manx Drain Solutions', domain: 'manxdrainsolutions.com', color: 'var(--site-manx)', propertyId: '373340845', scUrl: 'https://manxdrainsolutions.com/' },
-  { id: 'silverdale', name: 'Silverdale Limited', domain: 'silverdale.im', color: 'var(--site-silverdale)', propertyId: '496195002', scUrl: 'https://www.silverdale.im/' },
+  { id: 'dgc', name: 'DGC Ltd', domain: 'dgc.im', color: 'var(--site-dgc)', propertyId: '477291287', scUrl: 'sc-domain:dgc.im',
+    notTracked: ['Calls made straight from the Google advert.'] },
+  { id: 'manx', name: 'Manx Drain Solutions', domain: 'manxdrainsolutions.com', color: 'var(--site-manx)', propertyId: '373340845', scUrl: 'https://manxdrainsolutions.com/',
+    notTracked: ['Calls and enquiries from the Google advert — the Google Ads tag isn\'t on the website yet, so Google Ads can\'t see any results.', 'Contact-form sends — no "message sent" event is set up on this site yet.'] },
+  { id: 'silverdale', name: 'Silverdale Limited', domain: 'silverdale.im', color: 'var(--site-silverdale)', propertyId: '496195002', scUrl: 'https://www.silverdale.im/',
+    notTracked: [] },
 ];
+const NOT_TRACKED_ALL = [
+  'Taps on the phone number or email address.',
+  'Which buttons and links people click inside the site (only links to other websites are recorded).',
+  'Each visitor\'s exact journey, page by page and in order — needs Google\'s free BigQuery export switched on.',
+  'Who a visitor is or which company they work for — Google doesn\'t provide this, and data-protection law wouldn\'t allow it.',
+];
+
+const CHANNELS = {
+  'Direct':          { label: 'Direct', short: 'Direct', color: 'var(--ch-direct)', desc: 'Typed the address in, used a bookmark, or tapped a link that carries no source (WhatsApp, text message, email app, PDF, QR code). This is where people you\'ve given the address to show up — and most bots too.' },
+  'Organic Search':  { label: 'Google / Bing (free results)', short: 'Search (free)', color: 'var(--ch-organic)', desc: 'Found the site in a normal, unpaid search result on Google or Bing.' },
+  'Paid Search':     { label: 'Google Ads (search adverts)', short: 'Google Ads', color: 'var(--ch-paid)', desc: 'Clicked one of your paid search adverts.' },
+  'Cross-network':   { label: 'Google Ads (Performance Max)', short: 'Google Ads', color: 'var(--ch-paid)', desc: 'Clicked a Performance Max advert — shown across Google Search, YouTube, Maps, Gmail and partner websites.' },
+  'Display':         { label: 'Display adverts', short: 'Display ads', color: 'var(--ch-paid)', desc: 'Clicked a banner advert on another website.' },
+  'Paid Other':      { label: 'Other paid adverts', short: 'Other ads', color: 'var(--ch-paid)', desc: 'Clicked a paid advert Google couldn\'t classify.' },
+  'Referral':        { label: 'Link on another website', short: 'Other websites', color: 'var(--ch-referral)', desc: 'Clicked a link to the site from another website.' },
+  'Organic Social':  { label: 'Social media (free posts)', short: 'Social', color: 'var(--ch-referral)', desc: 'Came from a normal post or profile on Facebook, Instagram, LinkedIn etc.' },
+  'Paid Social':     { label: 'Social media adverts', short: 'Social ads', color: 'var(--ch-paid)', desc: 'Clicked a paid Facebook / Instagram advert.' },
+  'Email':           { label: 'Email campaign', short: 'Email', color: 'var(--ch-referral)', desc: 'Clicked a tracked link in an email campaign.' },
+  'Unassigned':      { label: 'No source recorded', short: 'No source', color: 'var(--ch-other)', desc: 'Google couldn\'t tell where they came from — usually a page left open and returned to later (no new page load), or a bot.' },
+};
+const chInfo = (ch) => CHANNELS[ch] || { label: ch, short: ch, color: 'var(--ch-other)', desc: '' };
 
 const MESSAGE_EVENTS = ['generate_lead', 'manual_event_SUBMIT_LEAD_FORM', 'submit_lead_form', 'ads_conversion_Form_1'];
 const EVENT_LABELS = {
@@ -313,12 +413,14 @@ const CONTACT_EVENTS = Object.keys(EVENT_LABELS);
 const STALE_AFTER_DAYS = 3;
 const BURIED_POSITION = 30;
 const REQUEST_TIMEOUT_MS = 25000;
+const NO_PAGE = ['(not set)', ''];
 
 const RANGE_DAYS = { today: 1, '7d': 7, '30d': 30 };
 let currentRange = '7d';
 let accessToken = null;
 let tokenClient = null;
 let openSiteId = null;
+let sourceFilter = 'all';
 let siteState = {};
 let loadSeq = 0;
 
@@ -457,132 +559,184 @@ function fmtDate(yyyymmdd) {
   const d = new Date(Date.UTC(+yyyymmdd.slice(0, 4), +yyyymmdd.slice(4, 6) - 1, +yyyymmdd.slice(6, 8)));
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: d.getUTCFullYear() === new Date().getUTCFullYear() ? undefined : 'numeric', timeZone: 'UTC' });
 }
+// Hours come back in the properties' GMT; shift to Isle of Man local time (BST in summer).
+function iomOffsetHours() {
+  const h = Number(new Date().toLocaleString('en-GB', { timeZone: 'Europe/Isle_of_Man', hour: '2-digit', hour12: false }));
+  return (h - new Date().getUTCHours() + 24) % 24;
+}
+
+const M = (...names) => names.map(name => ({ name }));
+const D = (...names) => names.map(name => ({ name }));
+const CH = 'sessionDefaultChannelGroup';
+const inList = (field, values) => ({ filter: { fieldName: field, inListFilter: { values } } });
+const noPageFilter = { orGroup: { expressions: NO_PAGE.map(v => ({ filter: { fieldName: 'landingPagePlusQueryString', stringFilter: { matchType: 'EXACT', value: v } } })) } };
+
+function toObjects(report, dims, mets) {
+  return ((report && report.rows) || []).map(r => {
+    const o = {};
+    dims.forEach((k, i) => { o[k] = r.dimensionValues[i].value; });
+    mets.forEach((k, i) => { o[k] = Number(r.metricValues[i].value); });
+    return o;
+  });
+}
 
 async function runGA4Reports(propertyId, days) {
   const base = `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}`;
   const range = [{ startDate: gaDate(days - 1), endDate: 'today' }];
-  const both = [{ name: 'sessions' }, { name: 'engagedSessions' }];
-  const bySessions = [{ metric: { metricName: 'sessions' }, desc: true }];
-  const [r1, r2, live] = await Promise.all([
+  const q = (dims, mets, extra) => ({ dateRanges: range, dimensions: D(...dims), metrics: M(...mets), limit: 1000, ...extra });
+  const visitMets = ['sessions', 'engagedSessions', 'userEngagementDuration', 'screenPageViews', 'newUsers'];
+  const visitKeys = ['sessions', 'engaged', 'eng', 'views', 'newU'];
+
+  const [a, b, c, live] = await Promise.all([
     postJSON(`${base}:batchRunReports`, { requests: [
-      { dateRanges: [{ startDate: gaDate(days * 2 - 1), endDate: 'today' }], dimensions: [{ name: 'date' }], metrics: both },
-      { dateRanges: range, dimensions: [{ name: 'sessionDefaultChannelGroup' }], metrics: both },
-      { dateRanges: range, dimensions: [{ name: 'sessionSourceMedium' }], metrics: both, orderBys: bySessions, limit: 10 },
-      { dateRanges: range, dimensions: [{ name: 'landingPagePlusQueryString' }], metrics: [...both, { name: 'averageSessionDuration' }, { name: 'newUsers' }, { name: 'totalUsers' }], orderBys: bySessions, limit: 8 },
-      { dateRanges: range, dimensions: [{ name: 'country' }], metrics: both, orderBys: bySessions, limit: 10 },
+      // Visitor groups: fine-grained enough that a zero-screen-time bot or background tab
+      // forms its own group, so it can be excluded from "real" visits (see realOf).
+      { dateRanges: [{ startDate: gaDate(days * 2 - 1), endDate: 'today' }], dimensions: D(CH, 'date', 'country', 'city', 'deviceCategory', 'operatingSystem', 'browser', 'screenResolution'), metrics: M(...visitMets), limit: 20000 },
+      q([CH, 'landingPagePlusQueryString'], visitMets),
+      q([CH, 'pagePath', 'pageTitle'], ['screenPageViews', 'userEngagementDuration', 'activeUsers']),
+      q([CH, 'hour'], ['sessions', 'engagedSessions']),
+      q([CH, 'dayOfWeek'], ['sessions', 'engagedSessions']),
     ] }).then(d => d.reports),
     postJSON(`${base}:batchRunReports`, { requests: [
-      { dateRanges: range, dimensions: [{ name: 'eventName' }, { name: 'date' }], metrics: [{ name: 'eventCount' }], dimensionFilter: { filter: { fieldName: 'eventName', inListFilter: { values: CONTACT_EVENTS } } } },
-      { dateRanges: [{ startDate: '2020-01-01', endDate: 'today' }], dimensions: [{ name: 'date' }], metrics: [{ name: 'sessions' }], orderBys: [{ dimension: { dimensionName: 'date' }, desc: true }], limit: 1 },
-      { dateRanges: range, dimensions: [{ name: 'landingPagePlusQueryString' }], metrics: [{ name: 'eventCount' }], dimensionFilter: { filter: { fieldName: 'eventName', inListFilter: { values: MESSAGE_EVENTS } } } },
+      q([CH, 'sessionSourceMedium'], visitMets),
+      q([CH, 'eventName', 'date'], ['eventCount'], { dimensionFilter: inList('eventName', CONTACT_EVENTS) }),
+      q([CH, 'pagePath', 'eventName'], ['eventCount'], { dimensionFilter: inList('eventName', ['scroll', ...MESSAGE_EVENTS]) }),
+      { dateRanges: [{ startDate: '2020-01-01', endDate: 'today' }], dimensions: D('date'), metrics: M('sessions'), orderBys: [{ dimension: { dimensionName: 'date' }, desc: true }], limit: 1 },
+      q([CH, 'landingPagePlusQueryString', 'pagePath'], ['eventCount'], { dimensionFilter: noPageFilter }),
+    ] }).then(d => d.reports),
+    postJSON(`${base}:batchRunReports`, { requests: [
+      q([CH, 'landingPagePlusQueryString'], ['eventCount'], { dimensionFilter: inList('eventName', MESSAGE_EVENTS) }),
     ] }).then(d => d.reports),
     postJSON(`${base}:runRealtimeReport`, { metrics: [{ name: 'activeUsers' }] }).catch(() => null),
   ]);
-  return { r1, r2, live };
+
+  const inRange = new Set(Array.from({ length: days }, (_, n) => utcDay(n).replace(/-/g, '')));
+  const groups = toObjects(a[0], ['ch', 'date', 'country', 'city', 'device', 'os', 'browser', 'res'], visitKeys)
+    .map(g => ({ ...g, real: realOf(g), current: inRange.has(g.date) }));
+  const lastRow = ((b[3] && b[3].rows) || [])[0];
+  return {
+    groups,
+    landing:    toObjects(a[1], ['ch', 'page'], visitKeys).map(r => ({ ...r, page: NO_PAGE.includes(r.page) ? '(not set)' : r.page })),
+    pages:      toObjects(a[2], ['ch', 'path', 'title'], ['views', 'eng', 'people']),
+    hours:      toObjects(a[3], ['ch', 'hour'], ['sessions', 'engaged']),
+    weekdays:   toObjects(a[4], ['ch', 'dow'], ['sessions', 'engaged']),
+    sources:    toObjects(b[0], ['ch', 'sm'], visitKeys),
+    events:     toObjects(b[1], ['ch', 'name', 'date'], ['count']),
+    pageEvents: toObjects(b[2], ['ch', 'path', 'name'], ['count']),
+    noPage:     toObjects(b[4], ['ch', 'landing', 'path'], ['count']).map(r => ({ ...r, landing: '(not set)' })),
+    landingMsgs: toObjects(c[0], ['ch', 'page'], ['count']).map(r => ({ ...r, page: NO_PAGE.includes(r.page) ? '(not set)' : r.page })),
+    lastDataDate: lastRow ? lastRow.dimensionValues[0].value : null,
+    liveNow: live && live.rows && live.rows.length ? Number(live.rows[0].metricValues[0].value) : 0,
+  };
+}
+
+// Google marks a visit "engaged" after 10 seconds even if the tab was never on screen (background
+// tabs, bots holding a page open), so a group with zero on-screen time has no real visits. A group
+// with on-screen time but no engaged flag is a page left open and returned to: count one.
+function realOf(g) {
+  if (g.eng <= 0) return 0;
+  if (g.engaged > 0) return g.engaged;
+  return g.eng >= 10 ? 1 : 0;
 }
 
 async function runSearchConsole(siteUrl, days) {
   const scDays = Math.max(days, 7);
-  const data = await postJSON(
-    `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`,
-    { startDate: utcDay(scDays - 1), endDate: utcDay(0), dimensions: ['query'], rowLimit: 100, dataState: 'all' }
-  );
-  const all = (data.rows || []).map(r => ({ term: r.keys[0], clicks: r.clicks, shown: r.impressions, pos: r.position }));
-  all.sort((a, b) => b.clicks - a.clicks || b.shown - a.shown);
+  const url = `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`;
+  const span = { startDate: utcDay(scDays - 1), endDate: utcDay(0), dataState: 'all' };
+  const [byQuery, byPage, totals] = await Promise.all([
+    postJSON(url, { ...span, dimensions: ['query'], rowLimit: 250 }),
+    postJSON(url, { ...span, dimensions: ['page'], rowLimit: 50 }),
+    postJSON(url, { ...span }),
+  ]);
+  const shape = (r) => ({ key: r.keys[0], clicks: r.clicks, shown: r.impressions, pos: r.position });
+  const all = (byQuery.rows || []).map(shape).sort((a, b) => b.clicks - a.clicks || b.shown - a.shown);
   // Page 4+ appearances are Google loosely matching a page to a far-off search (e.g. an Isle of Man
   // bathroom project vs "bathroom renovation ashby-de-la-zouch"); nobody scrolls that far.
-  const visible = all.filter(t => t.clicks > 0 || t.pos <= BURIED_POSITION);
-  const buried = all.filter(t => !(t.clicks > 0 || t.pos <= BURIED_POSITION));
+  const isVisible = (t) => t.clicks > 0 || t.pos <= BURIED_POSITION;
+  const tot = (totals.rows && totals.rows[0]) || { clicks: 0, impressions: 0, position: 0 };
   return {
     scDays,
-    terms: visible.slice(0, 12),
-    buried,
-    totalClicks: all.reduce((a, t) => a + t.clicks, 0),
+    terms: all.filter(isVisible).slice(0, 12),
+    buried: all.filter(t => !isVisible(t)),
     termCount: all.length,
+    namedClicks: all.reduce((a, t) => a + t.clicks, 0),
+    pages: (byPage.rows || []).map(shape).sort((a, b) => b.clicks - a.clicks || b.shown - a.shown).slice(0, 10),
+    totalClicks: tot.clicks, totalShown: tot.impressions, avgPos: tot.position,
   };
 }
 
-const rowsOf = (report) => (report && report.rows) || [];
-const dimOf = (r, i = 0) => r.dimensionValues[i].value;
-const metOf = (r, i = 0) => Number(r.metricValues[i].value);
+// ---------------------------------------------------------------------------
+// Aggregation (all breakdowns carry the channel so any view can be filtered by source)
+// ---------------------------------------------------------------------------
+const inSource = (r) => sourceFilter === 'all' || r.ch === sourceFilter;
+function sumBy(rows, keyFn, fields) {
+  const map = new Map();
+  for (const r of rows) {
+    const k = keyFn(r);
+    let agg = map.get(k);
+    if (!agg) { agg = { key: k, byCh: {} }; for (const f of fields) agg[f] = 0; map.set(k, agg); }
+    for (const f of fields) agg[f] += r[f];
+    agg.byCh[r.ch] = (agg.byCh[r.ch] || 0) + (r.sessions || r.views || r.count || 0);
+  }
+  return [...map.values()];
+}
+const total = (rows, f) => rows.reduce((a, r) => a + r[f], 0);
+const ratio = (a, b) => (b > 0 ? a / b : null);
+const pctText = (a, b) => (b > 0 ? Math.round((a / b) * 100) + '%' : '—');
+const perText = (a, b, dp = 1) => (b > 0 ? (a / b).toFixed(dp) : '—');
+function fmtDuration(sec) {
+  if (sec === null || sec === undefined || !isFinite(sec) || sec < 1) return '—';
+  const m = Math.floor(sec / 60), s = Math.round(sec % 60);
+  return m > 0 ? `${m}m ${s.toString().padStart(2, '0')}s` : `${s}s`;
+}
+const mainSource = (byCh) => {
+  const top = Object.entries(byCh).sort((a, b) => b[1] - a[1])[0];
+  return top ? chInfo(top[0]).short : '—';
+};
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
-function shapeReports({ r1, r2, live }, days) {
-  const [daily, channel, source, landing, country] = r1;
-  const [events, lastSeen, landingMsgs] = r2;
-
-  // GA4 omits days with no data, so build the calendar explicitly — otherwise "today" can
-  // silently show an older day's figure.
+function summarise(raw, days) {
+  // Card-level figures are always all sources.
   const byDate = {};
-  for (const r of rowsOf(daily)) byDate[dimOf(r)] = { sessions: metOf(r, 0), real: metOf(r, 1) };
+  for (const r of raw.groups) {
+    const e = byDate[r.date] || (byDate[r.date] = { sessions: 0, real: 0, engaged: 0 });
+    e.sessions += r.sessions; e.real += r.real; e.engaged += r.engaged;
+  }
   const series = [];
   for (let n = days * 2 - 1; n >= 0; n--) {
     const key = utcDay(n).replace(/-/g, '');
-    series.push({ date: key, ...(byDate[key] || { sessions: 0, real: 0 }) });
+    series.push({ date: key, ...(byDate[key] || { sessions: 0, real: 0, engaged: 0 }) });
   }
-  const recent = series.slice(-days);
-  const prior = series.slice(0, days);
+  const recent = series.slice(-days), prior = series.slice(0, days);
   const sum = (arr, k) => arr.reduce((a, x) => a + x[k], 0);
-  const today = series[series.length - 1];
+  const periodReal = sum(recent, 'real'), priorReal = sum(prior, 'real');
 
-  const periodReal = sum(recent, 'real');
-  const periodSessions = sum(recent, 'sessions');
-  const priorReal = sum(prior, 'real');
-  const priorSessions = sum(prior, 'sessions');
-  const delta = priorReal > 0 ? Math.round(((periodReal - priorReal) / priorReal) * 100) : null;
+  const current = raw.groups.filter(g => g.current);
+  const realByCh = {};
+  for (const g of current) realByCh[g.ch] = (realByCh[g.ch] || 0) + g.real;
+  const iomReal = total(current.filter(g => g.country === 'Isle of Man'), 'real');
+  const ghosts = total(current, 'engaged') - total(current, 'real');
+  const messages = total(raw.events.filter(e => MESSAGE_EVENTS.includes(e.name)), 'count');
 
-  const pairRows = (report) => rowsOf(report).map(r => ({ label: dimOf(r), sessions: metOf(r, 0), real: metOf(r, 1) }));
-  const channels = pairRows(channel).sort((a, b) => b.sessions - a.sessions);
-  const sources = pairRows(source);
-  const countries = pairRows(country);
-  const iom = countries.find(c => c.label === 'Isle of Man');
-
-  const eventTotals = {};
-  for (const r of rowsOf(events)) {
-    const name = dimOf(r, 0);
-    const e = eventTotals[name] || (eventTotals[name] = { total: 0, byDate: {} });
-    e.total += metOf(r);
-    e.byDate[dimOf(r, 1)] = (e.byDate[dimOf(r, 1)] || 0) + metOf(r);
-  }
-  const messages = MESSAGE_EVENTS.reduce((a, n) => a + ((eventTotals[n] && eventTotals[n].total) || 0), 0);
-
-  const msgsByPage = {};
-  for (const r of rowsOf(landingMsgs)) msgsByPage[dimOf(r)] = metOf(r);
-  const landingRows = rowsOf(landing).map(r => ({
-    page: dimOf(r),
-    sessions: metOf(r, 0),
-    real: metOf(r, 1),
-    avgSeconds: metOf(r, 2),
-    newShare: metOf(r, 4) > 0 ? metOf(r, 3) / metOf(r, 4) : null,
-    messages: msgsByPage[dimOf(r)] || 0,
-  }));
-
-  const lastRow = rowsOf(lastSeen)[0];
-  const lastDataDate = lastRow ? dimOf(lastRow) : null;
   let health = null;
-  if (!lastDataDate) {
+  if (!raw.lastDataDate) {
     health = 'Google Analytics has <strong>never received a single visit</strong> for this site. The website\'s tracking code isn\'t sending data here, so the zeros below are not real.';
   } else {
-    const ageDays = Math.floor((Date.parse(utcDay(0)) - Date.UTC(+lastDataDate.slice(0, 4), +lastDataDate.slice(4, 6) - 1, +lastDataDate.slice(6, 8))) / 86400000);
+    const d = raw.lastDataDate;
+    const ageDays = Math.floor((Date.parse(utcDay(0)) - Date.UTC(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8))) / 86400000);
     if (ageDays >= STALE_AFTER_DAYS) {
-      health = `<strong>Tracking broken:</strong> no visits have reached Google Analytics since <strong>${fmtDate(lastDataDate)}</strong>. The website isn't sending data to this property, so the zeros below are not real.`;
+      health = `<strong>Tracking broken:</strong> no visits have reached Google Analytics since <strong>${fmtDate(d)}</strong>. The website isn't sending data to this property, so the zeros below are not real.`;
     }
   }
 
-  const liveNow = live && live.rows && live.rows.length ? metOf(live.rows[0]) : 0;
-
   return {
-    todayReal: today.real, todaySessions: today.sessions,
-    periodReal, periodSessions, priorReal, priorSessions, delta,
+    todayReal: series[series.length - 1].real,
+    periodReal, periodSessions: sum(recent, 'sessions'),
+    priorReal, priorSessions: sum(prior, 'sessions'),
+    delta: priorReal > 0 ? Math.round(((periodReal - priorReal) / priorReal) * 100) : null,
     spark: recent.map(r => r.real),
-    channels, sources, countries, iomReal: iom ? iom.real : 0,
-    eventTotals, messages, landingRows, health, liveNow,
+    realByCh, iomReal, ghosts: Math.max(ghosts, 0), messages, health, liveNow: raw.liveNow,
   };
-}
-
-function fmtDuration(sec) {
-  if (!sec || sec < 1) return '—';
-  const m = Math.floor(sec / 60), s = Math.round(sec % 60);
-  return m > 0 ? `${m}m ${s.toString().padStart(2, '0')}s` : `${s}s`;
 }
 
 // ---------------------------------------------------------------------------
@@ -597,11 +751,15 @@ async function loadAllSites(isRefresh) {
 
   try {
     const results = await Promise.all(SITE_DEFS.map(async (site) => {
-      const out = { data: null, error: null, search: null, searchError: null };
-      try { out.data = shapeReports(await runGA4Reports(site.propertyId, days), days); }
-      catch (e) { out.error = e.message; firstError = firstError || e; }
-      try { out.search = await runSearchConsole(site.scUrl, days); }
-      catch (e) { out.searchError = e.message; }
+      const out = { raw: null, summary: null, error: null, search: null, searchError: null };
+      await Promise.all([
+        runGA4Reports(site.propertyId, days)
+          .then(raw => { out.raw = raw; out.summary = summarise(raw, days); })
+          .catch(e => { out.error = e.message; firstError = firstError || e; }),
+        runSearchConsole(site.scUrl, days)
+          .then(sc => { out.search = sc; })
+          .catch(e => { out.searchError = e.message; }),
+      ]);
       return [site.id, out];
     }));
     if (seq !== loadSeq) return;
@@ -627,7 +785,7 @@ async function loadAllSites(isRefresh) {
 }
 
 // ---------------------------------------------------------------------------
-// Rendering
+// Rendering — cards
 // ---------------------------------------------------------------------------
 function sparkPath(values, w, h) {
   const max = Math.max(...values, 1);
@@ -647,9 +805,9 @@ function renderCards() {
   el.innerHTML = SITE_DEFS.map(def => {
     const s = siteState[def.id];
     if (!s) return `<div class="site-card skeleton">${cardHead(def)}<div class="card-note">${accessToken ? 'Loading…' : 'Connect Google to load…'}</div></div>`;
-    if (s.error && !s.data) return `<div class="site-card">${cardHead(def)}<div class="card-note err">${esc(s.error)}</div></div>`;
+    if (s.error && !s.summary) return `<div class="site-card">${cardHead(def)}<div class="card-note err">${esc(s.error)}</div></div>`;
 
-    const d = s.data;
+    const d = s.summary;
     const spark = d.spark.length > 1 ? d.spark : [0, ...d.spark];
     const { line, area } = sparkPath(spark, 280, 40);
     const deltaHtml = days > 1 && d.delta !== null
@@ -657,6 +815,8 @@ function renderCards() {
     const secondLabel = days === 1 ? 'Yesterday' : `Last ${days} days`;
     const secondReal = days === 1 ? d.priorReal : d.periodReal;
     const secondTotal = days === 1 ? d.priorSessions : d.periodSessions;
+    const bySource = Object.entries(d.realByCh).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).slice(0, 3)
+      .map(([ch, n]) => `${esc(chInfo(ch).short)} <strong>${n}</strong>`).join(' · ');
 
     return `
     <div class="site-card${openSiteId === def.id ? ' selected' : ''}" data-site="${def.id}" tabindex="0" role="button" aria-expanded="${openSiteId === def.id}">
@@ -673,7 +833,7 @@ function renderCards() {
           ${deltaHtml}
         </div>
       </div>
-      <div class="stat-sub">${secondTotal} total visits ${days === 1 ? 'yesterday' : 'in this period'}, ${secondTotal - secondReal} left within 10 seconds (bots or instant exits)</div>
+      <div class="stat-sub">${secondTotal} total visits ${days === 1 ? 'yesterday' : 'in this period'}. The other ${Math.max(secondTotal - secondReal, 0)} were bots, instant exits or tabs nobody looked at${days > 1 && d.ghosts > 0 ? ` (incl. ${d.ghosts} Google counts as "engaged" that were never on screen)` : ''}.</div>
       <svg class="spark" viewBox="0 0 280 40" preserveAspectRatio="none" aria-label="Real visits per day">
         <path class="spark-area" d="${area}" fill="${def.color}"></path>
         <path class="spark-line" d="${line}" stroke="${def.color}"></path>
@@ -683,7 +843,8 @@ function renderCards() {
         <span>Real visits from Isle of Man: <strong>${d.iomReal}</strong></span>
         <span>On site now: <strong>${d.liveNow}</strong></span>
       </div>
-      <div class="expand-hint">Click for enquiries, search terms, locations and pages →</div>
+      ${bySource ? `<div class="mini-row"><span>Real visits by source: ${bySource}</span></div>` : ''}
+      <div class="expand-hint">Click for the full breakdown by source, page, place, device and time →</div>
     </div>`;
   }).join('');
 
@@ -693,12 +854,72 @@ function renderCards() {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Rendering — detail
+// ---------------------------------------------------------------------------
+function titleMap(pages) {
+  // Pick the title with the most active time, so a page's real title beats one only bots saw.
+  const best = {};
+  for (const p of pages) {
+    const cur = best[p.path];
+    if (!cur || p.eng > cur.eng || (p.eng === cur.eng && p.views > cur.views)) best[p.path] = p;
+  }
+  const out = {};
+  for (const [path, p] of Object.entries(best)) {
+    const t = (p.title || '').split(/\s+[|–-]\s+/)[0].trim();
+    if (t && t !== '(not set)') out[path] = t;
+  }
+  return out;
+}
+
+function pageCell(path, titles, noPageInfo) {
+  if (NO_PAGE.includes(path)) {
+    const where = noPageInfo && noPageInfo.length ? `Activity was on: ${noPageInfo.map(esc).join(', ')}.` : '';
+    return `No page load recorded<span class="cell-sub">The page had been left open, and the visitor came back to it after 30+ minutes, so Google started a new visit without a new page load. Usually a real person, sometimes a bot. ${where}</span>`;
+  }
+  const clean = path.split('?')[0];
+  const title = clean === '/' ? 'Home page' : titles[clean];
+  const query = path.includes('?') ? `<span class="cell-sub">Link had extra tracking text: ?${esc(path.split('?').slice(1).join('?').slice(0, 60))}</span>` : '';
+  return title ? `${esc(title)}<span class="cell-sub">${esc(clean)}</span>${query}` : `${esc(clean)}${query}`;
+}
+
+function renderChips(raw) {
+  const chTotals = sumBy(raw.groups.filter(g => g.current), r => r.ch, ['sessions']).sort((a, b) => b.sessions - a.sessions);
+  if (sourceFilter !== 'all' && !chTotals.some(c => c.key === sourceFilter)) sourceFilter = 'all';
+  const chip = (id, label, n) => `<button class="chip" data-ch="${esc(id)}" aria-pressed="${sourceFilter === id}">${esc(label)}${n !== undefined ? ` <span class="muted">${n}</span>` : ''}</button>`;
+  document.getElementById('chipBar').innerHTML = `<span class="chip-label">Show visitors from:</span>` +
+    chip('all', 'Everywhere') + chTotals.map(c => chip(c.key, chInfo(c.key).label, c.sessions)).join('');
+  document.getElementById('chipDesc').textContent = sourceFilter === 'all'
+    ? 'Showing every visitor. Pick a source to see how that group behaves on its own.'
+    : chInfo(sourceFilter).desc;
+  document.querySelectorAll('#chipBar .chip').forEach(b => b.addEventListener('click', () => {
+    sourceFilter = b.dataset.ch;
+    openDetail(openSiteId, false);
+  }));
+}
+
+function sumTile(label, value, note) {
+  return `<div class="sum-tile"><div class="stat-label">${label}</div><div class="sum-value">${value}</div>${note ? `<div class="sum-note">${note}</div>` : ''}</div>`;
+}
+
+function barChart(buckets, labels, axisEvery, color, titleFn) {
+  const max = Math.max(1, ...buckets.map(b => b.sessions));
+  const bars = buckets.map((b, i) => `
+    <div class="bar" title="${esc(titleFn(i, b))}">
+      <span class="tot" style="height:${(b.sessions / max * 100).toFixed(1)}%"></span>
+      <span class="real" style="height:${(b.engaged / max * 100).toFixed(1)}%;background:${color}"></span>
+    </div>`).join('');
+  const axis = labels.map((l, i) => `<span>${i % axisEvery === 0 ? l : ''}</span>`).join('');
+  return `<div class="bars">${bars}</div><div class="bar-axis">${axis}</div>
+    <div class="legend"><span><span class="swatch" style="background:${color}"></span>Engaged (Google's count)</span><span><span class="swatch" style="background:var(--gridline)"></span>Didn't engage</span></div>`;
+}
+
 function openDetail(siteId, scroll) {
   const s = siteState[siteId];
-  if (!s || !s.data) return;
+  if (!s || !s.raw) return;
   openSiteId = siteId;
   const def = SITE_DEFS.find(x => x.id === siteId);
-  const d = s.data;
+  const raw = s.raw;
   const days = RANGE_DAYS[currentRange];
   const periodText = days === 1 ? 'today' : `last ${days} days`;
 
@@ -707,69 +928,192 @@ function openDetail(siteId, scroll) {
     `<a href="https://analytics.google.com/analytics/web/#/p${def.propertyId}/reports/intelligenthome" target="_blank" rel="noopener">Check in Google Analytics ↗</a>` +
     `<a href="https://search.google.com/search-console/performance/search-analytics?resource_id=${encodeURIComponent(def.scUrl)}" target="_blank" rel="noopener">Check in Search Console ↗</a>`;
 
-  const enquiryNames = CONTACT_EVENTS.filter(n => d.eventTotals[n]);
-  document.getElementById('enquiryList').innerHTML = enquiryNames.length
-    ? enquiryNames.map(n => {
-        const e = d.eventTotals[n];
-        const dates = Object.keys(e.byDate).sort().reverse().map(k => `${fmtDate(k)}: ${e.byDate[k]}`).join(', ');
-        return `<li><span class="query-term">${esc(EVENT_LABELS[n])}<br><span class="panel-note">${dates}</span></span><span class="query-count">${e.total}</span></li>`;
-      }).join('')
-    : `<li class="empty-note">No contact-form sends, phone taps or contact-page visits recorded ${periodText}.</li>`;
+  renderChips(raw);
+  const titles = titleMap(raw.pages);
 
-  document.getElementById('countryList').innerHTML = d.countries.length
-    ? d.countries.map(c => `<li><span class="query-term">${esc(c.label)}</span><span class="query-count">${c.real} real <span class="muted">/ ${c.sessions} total</span></span></li>`).join('')
-    : '<li class="empty-note">No visits in this period.</li>';
+  // Behaviour averages use only groups with real visits, so bots don't drag them down.
+  const stats = (rows) => {
+    const R = rows.filter(g => g.real > 0);
+    return {
+      sessions: total(rows, 'sessions'), real: total(rows, 'real'), engaged: total(rows, 'engaged'),
+      activePer: ratio(total(R, 'eng'), total(R, 'real')),
+      pagesPer: ratio(total(R, 'views'), total(R, 'sessions')),
+      firstShare: ratio(total(R, 'newU'), total(R, 'sessions')),
+    };
+  };
+  const ghostNote = (engaged, real) => {
+    const n = engaged - real;
+    return n >= 2 ? `<span class="cell-sub warn">${n} of these Google counts as engaged were never on screen: bots or background tabs.</span>` : '';
+  };
+  const lowActiveNote = (engaged, eng) => (engaged >= 3 && eng / engaged < 5
+    ? '<span class="cell-sub warn">Google counts these as engaged, but they spent almost no time on screen: likely bots or background tabs.</span>' : '');
+  const pctOf = (share) => (share === null ? '—' : Math.round(share * 100) + '%');
 
-  const chTotal = d.channels.reduce((a, c) => a + c.sessions, 0) || 1;
-  const CHANNEL_COLOR = { 'Direct': 'var(--ch-direct)', 'Organic Search': 'var(--ch-organic)', 'Paid Search': 'var(--ch-paid)', 'Paid Social': 'var(--ch-paid)', 'Organic Social': 'var(--ch-organic)', 'Referral': 'var(--ch-referral)' };
-  document.getElementById('channelBars').innerHTML = d.channels.length
-    ? d.channels.map(c => `
-      <div class="chan-row">
-        <span class="chan-label">${esc(c.label)}</span>
-        <span class="chan-track"><span class="chan-fill" style="width:${(c.sessions / chTotal * 100).toFixed(0)}%;background:${CHANNEL_COLOR[c.label] || 'var(--ch-other)'}"></span></span>
-        <span class="chan-value">${c.real} real / ${c.sessions}</span>
-      </div>`).join('')
-    : '<div class="empty-note">No visits in this period.</div>';
+  const current = raw.groups.filter(g => g.current);
+  const G = current.filter(inSource);
+  const sel = stats(G);
+  const ev = raw.events.filter(inSource);
+  const msgs = total(ev.filter(e => MESSAGE_EVENTS.includes(e.name)), 'count');
+  const formStarts = total(ev.filter(e => e.name === 'form_start'), 'count');
 
-  document.getElementById('sourceList').innerHTML = d.sources.length
-    ? d.sources.map(r => `<li><span class="query-term">${esc(r.label)}</span><span class="query-count">${r.real} real <span class="muted">/ ${r.sessions} total</span></span></li>`).join('')
-    : '<li class="empty-note">No visits in this period.</li>';
+  // Summary strip
+  document.getElementById('summaryStrip').innerHTML = [
+    sumTile('Visits', sel.sessions, 'every visit, bots included'),
+    sumTile('Real visits', sel.real, `${pctText(sel.real, sel.sessions)} of visits: page actually on screen`),
+    sumTile('Engaged (Google)', sel.engaged, sel.engaged > sel.real ? `${sel.engaged - sel.real} of these were never on screen` : 'Google\'s own count'),
+    sumTile('Active time', fmtDuration(sel.activePer), 'on screen, per real visit'),
+    sumTile('Pages per visit', sel.pagesPer === null ? '—' : sel.pagesPer.toFixed(1), 'real visitors only'),
+    sumTile('First-time', pctOf(sel.firstShare), sel.firstShare === null ? 'real visitors only' : `${pctOf(1 - sel.firstShare)} had been before`),
+    sumTile('Messages sent', msgs, formStarts ? `${plural(formStarts, 'form')} started` : 'contact-form sends'),
+  ].join('');
 
-  const termRows = document.getElementById('termRows');
-  const termNote = document.getElementById('termNote');
-  if (s.searchError) {
-    termRows.innerHTML = `<tr><td colspan="4" class="empty-note">Search Console error: ${esc(s.searchError)}</td></tr>`;
-    termNote.textContent = '';
-  } else if (!s.search || !s.search.terms.length) {
-    termRows.innerHTML = '<tr><td colspan="4" class="empty-note">Google hasn\'t shown this site for any searches in this period.</td></tr>';
-    termNote.textContent = '';
-  } else {
-    termRows.innerHTML = s.search.terms.map(t => `
-      <tr>
-        <td>${esc(t.term)}</td>
-        <td class="num">${t.shown}</td>
-        <td class="num">${t.clicks > 0 ? `<span class="pill good">${t.clicks}</span>` : '0'}</td>
-        <td class="num">${t.pos.toFixed(0)}</td>
-      </tr>`).join('');
-    const buried = s.search.buried;
-    const buriedText = buried.length
-      ? ` Also appeared on page 4 or later (where nobody looks) for ${buried.length} other search${buried.length === 1 ? '' : 'es'}, e.g. "${esc(buried.slice(0, 2).map(t => t.term).join('", "'))}". Those are Google loosely matching a page, not real interest, so they're left out above.`
-      : '';
-    termNote.innerHTML = `Last ${s.search.scDays} days${days < s.search.scDays ? ' (search data needs at least a week to be useful)' : ''}. <strong>Shown</strong> = how many times this site appeared in Google results for that search. <strong>Clicked</strong> = how many people then clicked through. <strong>Position</strong> = average ranking (1 = top of page one; 11+ = page two or later). ${s.search.totalClicks} click${s.search.totalClicks === 1 ? '' : 's'} from ${s.search.termCount} different searches in total. Google reports search data 2–3 days late.${buriedText}`;
+  // Source comparison (always all sources)
+  const msgByCh = {};
+  for (const e of raw.events) if (MESSAGE_EVENTS.includes(e.name)) msgByCh[e.ch] = (msgByCh[e.ch] || 0) + e.count;
+  const chKeys = [...new Set(current.map(g => g.ch))]
+    .map(ch => ({ key: ch, ...stats(current.filter(g => g.ch === ch)), msgs: msgByCh[ch] || 0 }))
+    .sort((a, b) => b.sessions - a.sessions);
+  const compareRow = (r, label, extraClass) => `
+    <tr class="${extraClass}" data-ch="${esc(r.key)}">
+      <td>${label}${ghostNote(r.engaged, r.real)}</td>
+      <td class="num">${r.sessions}</td>
+      <td class="num">${r.real} <span class="muted">(${pctText(r.real, r.sessions)})</span></td>
+      <td class="num">${r.engaged}</td>
+      <td class="num">${fmtDuration(r.activePer)}</td>
+      <td class="num">${r.pagesPer === null ? '—' : r.pagesPer.toFixed(1)}</td>
+      <td class="num">${pctOf(r.firstShare)}</td>
+      <td class="num">${r.msgs > 0 ? `<span class="pill good">${r.msgs}</span>` : '—'}</td>
+    </tr>`;
+  document.getElementById('compareRows').innerHTML = chKeys.length
+    ? chKeys.map(r => compareRow(r,
+        `<span class="swatch" style="background:${chInfo(r.key).color}"></span>${esc(chInfo(r.key).label)}<span class="cell-sub">${esc(chInfo(r.key).desc)}</span>`,
+        'clickable' + (sourceFilter === r.key ? ' active' : ''))).join('') +
+      compareRow({ key: 'all', ...stats(current), msgs: Object.values(msgByCh).reduce((a, n) => a + n, 0) }, 'All sources', 'total clickable' + (sourceFilter === 'all' ? ' active' : ''))
+    : '<tr><td colspan="8" class="empty-note">No visits in this period.</td></tr>';
+  document.querySelectorAll('#compareRows tr.clickable').forEach(tr => tr.addEventListener('click', () => {
+    sourceFilter = tr.dataset.ch;
+    openDetail(openSiteId, false);
+  }));
+
+  // Landing pages
+  const noPageInfo = {};
+  for (const r of raw.noPage.filter(inSource)) {
+    const m = noPageInfo[r.landing] || (noPageInfo[r.landing] = {});
+    m[r.path] = (m[r.path] || 0) + r.count;
   }
-
-  const pageLabel = (p) => p === '/' ? 'Home page (/)' : (p === '' || p === '(not set)' ? '(unknown — usually bots)' : p);
-  document.getElementById('landingRows').innerHTML = d.landingRows.length
-    ? d.landingRows.map(r => `
+  const noPagePaths = (landing) => Object.entries(noPageInfo[landing] || {}).sort((a, b) => b[1] - a[1]).slice(0, 5)
+    .map(([p]) => (p === '/' ? 'Home page' : (titles[p] ? `${titles[p]} (${p})` : p)));
+  const msgByLanding = {};
+  for (const r of raw.landingMsgs.filter(inSource)) msgByLanding[r.page] = (msgByLanding[r.page] || 0) + r.count;
+  const landing = sumBy(raw.landing.filter(inSource), r => r.page, ['sessions', 'engaged', 'eng', 'views', 'newU']).sort((a, b) => b.sessions - a.sessions).slice(0, 15);
+  document.getElementById('landingMainHead').style.display = sourceFilter === 'all' ? '' : 'none';
+  document.getElementById('landingRows').innerHTML = landing.length
+    ? landing.map(r => `
       <tr>
-        <td>${esc(pageLabel(r.page))}</td>
+        <td>${pageCell(r.key, titles, noPagePaths(r.key))}${lowActiveNote(r.engaged, r.eng)}</td>
         <td class="num">${r.sessions}</td>
-        <td class="num">${r.real}</td>
-        <td class="num">${fmtDuration(r.avgSeconds)}</td>
-        <td class="num">${r.newShare === null ? '—' : Math.round(r.newShare * 100) + '%'}</td>
-        <td class="num">${r.messages > 0 ? `<span class="pill good">${r.messages}</span>` : '—'}</td>
+        <td class="num">${r.engaged}</td>
+        <td class="num">${fmtDuration(ratio(r.eng, r.sessions))}</td>
+        <td class="num">${r.views ? perText(r.views, r.sessions) : '—'}</td>
+        <td class="num">${pctText(r.newU, r.sessions)}</td>
+        <td class="num">${msgByLanding[r.key] ? `<span class="pill good">${msgByLanding[r.key]}</span>` : '—'}</td>
+        ${sourceFilter === 'all' ? `<td>${esc(mainSource(r.byCh))}</td>` : ''}
       </tr>`).join('')
-    : '<tr><td colspan="6" class="empty-note">No visits in this period.</td></tr>';
+    : '<tr><td colspan="8" class="empty-note">No visits from this source in this period.</td></tr>';
+
+  // Every page viewed
+  const pageEv = {};
+  for (const r of raw.pageEvents.filter(inSource)) {
+    const e = pageEv[r.path] || (pageEv[r.path] = { scroll: 0, msgs: 0 });
+    if (r.name === 'scroll') e.scroll += r.count; else e.msgs += r.count;
+  }
+  const pages = sumBy(raw.pages.filter(inSource), r => r.path, ['views', 'eng', 'people']).sort((a, b) => b.views - a.views).slice(0, 20);
+  document.getElementById('pageRows').innerHTML = pages.length
+    ? pages.map(r => {
+        const e = pageEv[r.key] || { scroll: 0, msgs: 0 };
+        return `
+        <tr>
+          <td>${pageCell(r.key, titles)}</td>
+          <td class="num">${r.views}</td>
+          <td class="num">${r.people}</td>
+          <td class="num">${fmtDuration(ratio(r.eng, r.views))}</td>
+          <td class="num">${r.views > 0 ? pctText(Math.min(e.scroll, r.views), r.views) : '—'}</td>
+          <td class="num">${e.msgs ? `<span class="pill good">${e.msgs}</span>` : '—'}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="6" class="empty-note">No page views from this source in this period.</td></tr>';
+
+  // Enquiries
+  const evTotals = {};
+  for (const e of ev) {
+    const t = evTotals[e.name] || (evTotals[e.name] = { total: 0, byDate: {} });
+    t.total += e.count;
+    t.byDate[e.date] = (t.byDate[e.date] || 0) + e.count;
+  }
+  const enquiryNames = CONTACT_EVENTS.filter(n => evTotals[n]);
+  const abandoned = Math.max(formStarts - msgs, 0);
+  document.getElementById('enquiryList').innerHTML = (enquiryNames.length
+    ? enquiryNames.map(n => {
+        const t = evTotals[n];
+        const dates = Object.keys(t.byDate).sort().reverse().map(k => `${fmtDate(k)}: ${t.byDate[k]}`).join(', ');
+        return `<li><span class="query-term">${esc(EVENT_LABELS[n])}<span class="sub">${dates}</span></span><span class="query-count">${t.total}</span></li>`;
+      }).join('')
+    : `<li class="empty-note">No contact-form activity recorded ${periodText}${sourceFilter === 'all' ? '' : ' from this source'}.</li>`) +
+    (formStarts ? `<li><span class="query-term">Started the form but didn't send<span class="sub">${abandoned ? 'Began typing into the contact form and left without sending.' : 'Everyone who started the form sent it.'}</span></span><span class="query-count">${abandoned}</span></li>` : '');
+
+  // Where
+  const placeOf = (g) => (g.country === 'Isle of Man' ? `Isle of Man · ${g.city === '(not set)' ? 'town unknown' : g.city}` : g.country === '(not set)' ? 'Location unknown' : g.country);
+  const geoRows = [...new Set(G.map(placeOf))].map(key => ({ key, ...stats(G.filter(g => placeOf(g) === key)) }))
+    .sort((a, b) => (b.key.startsWith('Isle of Man') - a.key.startsWith('Isle of Man')) || b.real - a.real || b.sessions - a.sessions).slice(0, 14);
+  document.getElementById('countryList').innerHTML = geoRows.length
+    ? geoRows.map(c => `<li><span class="query-term">${esc(c.key)}${c.key === 'Location unknown' ? '<span class="sub">Google couldn\'t place the visitor, which is typical of bots and data-centre traffic.</span>' : ''}${ghostNote(c.engaged, c.real)}</span><span class="query-count">${c.real} real <span class="muted">/ ${plural(c.sessions, 'visit')}${c.real ? ` · ${fmtDuration(c.activePer)} each` : ''}</span></span></li>`).join('')
+    : '<li class="empty-note">No visits from this source in this period.</li>';
+
+  // When
+  const off = iomOffsetHours();
+  const hourBuckets = Array.from({ length: 24 }, () => ({ sessions: 0, engaged: 0 }));
+  for (const r of raw.hours.filter(inSource)) {
+    const h = (Number(r.hour) + off) % 24;
+    hourBuckets[h].sessions += r.sessions; hourBuckets[h].engaged += r.engaged;
+  }
+  const hourLabels = hourBuckets.map((_, i) => String(i).padStart(2, '0'));
+  document.getElementById('hourChart').innerHTML = barChart(hourBuckets, hourLabels, 3, def.color,
+    (i, b) => `${hourLabels[i]}:00–${String((i + 1) % 24).padStart(2, '0')}:00, ${plural(b.sessions, 'visit')}, ${b.engaged} engaged`);
+  const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dayBuckets = Array.from({ length: 7 }, () => ({ sessions: 0, engaged: 0 }));
+  for (const r of raw.weekdays.filter(inSource)) { dayBuckets[+r.dow].sessions += r.sessions; dayBuckets[+r.dow].engaged += r.engaged; }
+  const monFirst = [1, 2, 3, 4, 5, 6, 0];
+  document.getElementById('dayChart').innerHTML = barChart(monFirst.map(i => dayBuckets[i]), monFirst.map(i => DAY_NAMES[i]), 1, def.color,
+    (i, b) => `${DAY_NAMES[monFirst[i]]}, ${plural(b.sessions, 'visit')}, ${b.engaged} engaged`) +
+    (days < 14 ? '<div class="panel-note">Pick "Last 30 days" for a fair day-of-week comparison.</div>' : '');
+
+  // Devices
+  const deviceOf = (g) => `${g.device === 'mobile' ? 'Phone' : g.device === 'desktop' ? 'Computer' : g.device === 'tablet' ? 'Tablet' : g.device} · ${g.os === '(not set)' ? 'system unknown' : g.os}`;
+  const devices = [...new Set(G.map(deviceOf))].map(key => ({ key, ...stats(G.filter(g => deviceOf(g) === key)) }))
+    .sort((a, b) => b.sessions - a.sessions).slice(0, 10);
+  document.getElementById('deviceRows').innerHTML = devices.length
+    ? devices.map(r => `<tr><td>${esc(r.key)}${ghostNote(r.engaged, r.real)}</td><td class="num">${r.sessions}</td><td class="num">${r.real}</td><td class="num">${fmtDuration(r.activePer)}</td><td class="num">${r.pagesPer === null ? '—' : r.pagesPer.toFixed(1)}</td></tr>`).join('')
+    : '<tr><td colspan="5" class="empty-note">No visits from this source in this period.</td></tr>';
+
+  // Exact sources
+  const SM_NOTES = {
+    '(direct) / (none)': 'Typed in, bookmark, or a link with no source (WhatsApp, text, email app, QR).',
+    'google / organic': 'Free Google search result.',
+    'bing / organic': 'Free Bing search result.',
+    'google / cpc': 'Google Ads click.',
+    '(not set)': 'Google couldn\'t record a source, usually a page left open and returned to, or a bot.',
+  };
+  const sources = sumBy(raw.sources.filter(inSource), r => r.sm, ['sessions', 'engaged', 'eng']).sort((a, b) => b.sessions - a.sessions).slice(0, 12);
+  document.getElementById('sourceList').innerHTML = sources.length
+    ? sources.map(r => `<li><span class="query-term">${esc(r.key)}${SM_NOTES[r.key] ? `<span class="sub">${esc(SM_NOTES[r.key])}</span>` : r.key.includes('referral') ? '<span class="sub">A link on that website.</span>' : ''}${lowActiveNote(r.engaged, r.eng)}</span><span class="query-count">${r.engaged} engaged <span class="muted">/ ${plural(r.sessions, 'visit')} · ${fmtDuration(ratio(r.eng, r.sessions))} each</span></span></li>`).join('')
+    : '<li class="empty-note">No visits from this source in this period.</li>';
+
+  renderSearch(s, days);
+
+  document.getElementById('notTracked').innerHTML = [
+    ...(s.summary.health ? ['<strong>Everything on this page</strong> — the website\'s tracking isn\'t reaching Google Analytics at the moment (see the red warning on the card).'] : []),
+    ...def.notTracked.map(esc), ...NOT_TRACKED_ALL.map(esc),
+  ].map(t => `<li>${t}</li>`).join('');
 
   const panel = document.getElementById('detailPanel');
   panel.classList.add('open');
@@ -778,7 +1122,42 @@ function openDetail(siteId, scroll) {
     c.classList.toggle('selected', on);
     c.setAttribute('aria-expanded', on);
   });
-  if (scroll) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (scroll) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderSearch(s, days) {
+  const strip = document.getElementById('searchStrip');
+  const termRows = document.getElementById('termRows');
+  const gPageRows = document.getElementById('gPageRows');
+  const termNote = document.getElementById('termNote');
+  if (s.searchError) {
+    strip.innerHTML = '';
+    termRows.innerHTML = `<tr><td colspan="4" class="empty-note">Search Console error: ${esc(s.searchError)}</td></tr>`;
+    gPageRows.innerHTML = ''; termNote.textContent = '';
+    return;
+  }
+  const sc = s.search;
+  document.getElementById('searchSub').textContent = `Last ${sc.scDays} days${days < sc.scDays ? ' (search data needs at least a week to mean anything)' : ''}, from Google Search Console. Not affected by the filter above — it only covers free Google results. Google reports this 2–3 days late.`;
+  strip.innerHTML = [
+    sumTile('Shown in Google', sc.totalShown, 'times the site appeared in results'),
+    sumTile('Clicked', sc.totalClicks, `${pctText(sc.totalClicks, sc.totalShown)} of times shown`),
+    sumTile('Average position', sc.totalShown ? sc.avgPos.toFixed(0) : '—', '1 = top of page one'),
+  ].join('');
+  const row = (label, t) => `<tr><td>${label}</td><td class="num">${t.shown}</td><td class="num">${t.clicks > 0 ? `<span class="pill good">${t.clicks}</span>` : '0'}</td><td class="num">${t.pos.toFixed(0)}</td></tr>`;
+  termRows.innerHTML = sc.terms.length ? sc.terms.map(t => row(esc(t.key), t)).join('')
+    : '<tr><td colspan="4" class="empty-note">Google hasn\'t shown this site for any named searches in this period.</td></tr>';
+  const hidden = Math.max(sc.totalClicks - sc.namedClicks, 0);
+  const buriedText = sc.buried.length
+    ? ` Also appeared on page 4 or later (where nobody looks) for ${plural(sc.buried.length, 'other search')}, e.g. "${esc(sc.buried.slice(0, 2).map(t => t.key).join('", "'))}". That's Google loosely matching a page, not real interest, so they're left out.`
+    : '';
+  termNote.innerHTML = `<strong>Shown</strong> = times the site appeared for that search. <strong>Clicked</strong> = people who then clicked through. <strong>Position</strong> = average ranking (1 = top of page one; 11+ = page two or later).` +
+    (hidden > 0 ? ` <strong>Google hides the words for rare searches</strong> to protect privacy: ${plural(hidden, 'click')} of ${sc.totalClicks} came from searches it won't name. The pages list below includes them.` : '') + buriedText;
+  gPageRows.innerHTML = sc.pages.length
+    ? sc.pages.map(p => {
+        const path = p.key.replace(/^https?:\/\/[^/]+/, '') || '/';
+        return row(path === '/' ? `Home page<span class="cell-sub">/</span>` : esc(path), p);
+      }).join('')
+    : '<tr><td colspan="4" class="empty-note">No pages shown in Google in this period.</td></tr>';
 }
 
 document.getElementById('closeDetail').addEventListener('click', () => {
