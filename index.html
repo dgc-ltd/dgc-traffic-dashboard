@@ -19,9 +19,9 @@
     --success:        #006300;
     --critical:       #d03b3b;
 
-    --site-dgc:       #2a78d6; /* blue */
-    --site-manx:      #eb6834; /* orange */
-    --site-silverdale:#1baf7a; /* aqua */
+    --site-dgc:       #2a78d6;
+    --site-manx:      #eb6834;
+    --site-silverdale:#1baf7a;
 
     --ch-direct:      #2a78d6;
     --ch-organic:     #1baf7a;
@@ -77,7 +77,6 @@
   }
   .btn.secondary { background: var(--surface-1); color: var(--text-secondary); }
   .signed-in-as { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
-  .signed-in-as a { color: inherit; }
 
   .status-banner {
     margin: 16px 0 24px;
@@ -98,26 +97,17 @@
   .dot.live { background: var(--success); }
   .dot.err { background: var(--critical); }
 
-  .range-row {
-    display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; align-items: center;
-  }
+  .range-row { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
   .range-btn {
     font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px;
     border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary);
     cursor: pointer;
   }
-  .range-btn[aria-pressed="true"] {
-    background: var(--text-primary); color: var(--page); border-color: var(--text-primary);
-  }
+  .range-btn[aria-pressed="true"] { background: var(--text-primary); color: var(--page); border-color: var(--text-primary); }
   .range-btn:disabled { opacity: .5; cursor: default; }
   .last-updated { margin-left: auto; font-size: 12px; color: var(--text-muted); }
 
-  .sites {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin-bottom: 28px;
-  }
+  .sites { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
   @media (max-width: 860px) { .sites { grid-template-columns: 1fr; } }
 
   .site-card {
@@ -128,18 +118,28 @@
     cursor: pointer;
     min-height: 150px;
   }
-  .site-card-head {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
-  }
+  .site-card.selected { border-color: var(--text-secondary); }
+  .site-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
   .site-swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
   .site-name { font-weight: 600; font-size: 14px; }
   .site-domain { color: var(--text-muted); font-size: 12px; margin-left: auto; }
 
-  .stat-row { display: flex; gap: 22px; margin-bottom: 10px; }
+  .health {
+    font-size: 12px; line-height: 1.45; color: var(--critical);
+    border: 1px solid color-mix(in srgb, var(--critical) 35%, var(--border));
+    border-radius: 8px; padding: 8px 10px; margin-bottom: 12px;
+  }
+  .health strong { color: var(--critical); }
+
+  .stat-row { display: flex; gap: 22px; margin-bottom: 4px; }
   .stat-tile .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); }
-  .stat-tile .stat-value { font-size: 28px; font-weight: 600; line-height: 1.15; }
+  .stat-tile .stat-value { font-size: 28px; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
   .stat-tile .stat-delta { font-size: 12px; color: var(--success); font-variant-numeric: tabular-nums; }
   .stat-tile .stat-delta.neg { color: var(--text-muted); }
+  .stat-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+
+  .mini-row { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
+  .mini-row strong { color: var(--text-primary); font-variant-numeric: tabular-nums; }
 
   svg.spark { width: 100%; height: 40px; display: block; margin-top: 6px; }
   .spark-line { fill: none; stroke-width: 2; }
@@ -148,10 +148,8 @@
   .expand-hint { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
   .card-note { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
   .card-note.err { color: var(--critical); }
-
   .skeleton { opacity: .5; }
 
-  /* Expanded detail */
   .detail {
     display: none;
     background: var(--surface-1);
@@ -161,54 +159,51 @@
     margin-bottom: 28px;
   }
   .detail.open { display: block; }
-  .detail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .detail-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
   .detail-head h2 { font-size: 16px; margin: 0; }
+  .detail-links { display: flex; gap: 14px; font-size: 12px; flex-wrap: wrap; }
+  .detail-links a { color: var(--text-secondary); }
   .close-btn {
     font: inherit; font-size: 13px; border: 1px solid var(--border); background: transparent;
     color: var(--text-secondary); border-radius: 8px; padding: 5px 10px; cursor: pointer;
   }
 
-  .detail-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
   @media (max-width: 780px) { .detail-grid { grid-template-columns: 1fr; } }
 
-  .panel-title { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin-bottom: 10px; }
+  .panel-title { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 22px 0 10px; }
+  .detail-grid > div > .panel-title:first-child { margin-top: 0; }
+  .panel-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.45; }
 
-  /* Channel bar chart */
   .chan-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
-  .chan-label { width: 96px; flex: none; color: var(--text-secondary); }
+  .chan-label { width: 104px; flex: none; color: var(--text-secondary); }
   .chan-track { flex: 1; height: 10px; background: var(--gridline); border-radius: 4px; overflow: hidden; }
   .chan-fill { display: block; height: 100%; border-radius: 4px; }
-  .chan-value { width: 40px; flex: none; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
-  .legend-note { margin-top: 4px; font-size: 12px; color: var(--text-muted); }
+  .chan-value { width: 96px; flex: none; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); font-size: 12px; }
 
-  /* Search queries */
   .query-list { list-style: none; margin: 0; padding: 0; }
-  .query-list li {
-    display: flex; justify-content: space-between; gap: 10px;
-    padding: 7px 0; border-bottom: 1px solid var(--gridline); font-size: 13px;
-  }
+  .query-list li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--gridline); font-size: 13px; }
   .query-list li:last-child { border-bottom: none; }
-  .query-term { color: var(--text-primary); }
-  .query-count { color: var(--text-muted); font-variant-numeric: tabular-nums; flex: none; }
+  .query-term { color: var(--text-primary); overflow-wrap: anywhere; }
+  .query-count { color: var(--text-secondary); font-variant-numeric: tabular-nums; flex: none; text-align: right; }
+  .query-count .muted { color: var(--text-muted); }
 
-  /* Landing pages table */
-  table.sessions { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
-  table.sessions th {
+  .table-wrap { overflow-x: auto; }
+  table.data { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  table.data th {
     text-align: left; font-weight: 500; font-size: 11px; text-transform: uppercase;
-    letter-spacing: .03em; color: var(--text-muted); padding: 6px 8px; border-bottom: 1px solid var(--baseline);
+    letter-spacing: .03em; color: var(--text-muted); padding: 6px 8px; border-bottom: 1px solid var(--baseline); white-space: nowrap;
   }
-  table.sessions td { padding: 8px; border-bottom: 1px solid var(--gridline); vertical-align: top; }
-  table.sessions tr:last-child td { border-bottom: none; }
-  .pill {
-    display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px;
-    background: var(--gridline); color: var(--text-secondary);
-  }
-  .pill.new { background: color-mix(in srgb, var(--ch-organic) 18%, var(--surface-1)); color: var(--ch-organic); }
-  .source-cell { color: var(--text-secondary); }
+  table.data th.num, table.data td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.data td { padding: 8px; border-bottom: 1px solid var(--gridline); vertical-align: top; }
+  table.data td:first-child { overflow-wrap: anywhere; }
+  table.data tr:last-child td { border-bottom: none; }
+  .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--gridline); color: var(--text-secondary); }
+  .pill.good { background: color-mix(in srgb, var(--ch-organic) 18%, var(--surface-1)); color: var(--ch-organic); }
   .empty-note { font-size: 13px; color: var(--text-muted); padding: 8px 0; }
 
-  footer { margin-top: 30px; font-size: 12px; color: var(--text-muted); }
-  footer a { color: inherit; }
+  footer { margin-top: 30px; font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+  footer p { margin: 0 0 8px; }
 </style>
 </head>
 <body>
@@ -226,7 +221,7 @@
 
   <div class="status-banner" id="statusBanner">
     <span class="dot muted"></span>
-    <span>Not connected yet — click <strong>Connect Google account</strong> above, sign in as usiom.business@gmail.com, then approve access to Analytics and Search Console (read‑only).</span>
+    <span>Not connected yet — click <strong>Connect Google account</strong> above, sign in as usiom.business@gmail.com, then approve access to Analytics and Search Console (read-only).</span>
   </div>
 
   <div class="range-row" role="group" aria-label="Date range">
@@ -241,63 +236,99 @@
   <section class="detail" id="detailPanel">
     <div class="detail-head">
       <h2 id="detailTitle">Site detail</h2>
+      <div class="detail-links" id="detailLinks"></div>
       <button class="close-btn" id="closeDetail">Close</button>
     </div>
     <div class="detail-grid">
       <div>
-        <div class="panel-title">Traffic sources</div>
+        <div class="panel-title">Enquiries</div>
+        <ul class="query-list" id="enquiryList"></ul>
+
+        <div class="panel-title">Where visitors are</div>
+        <ul class="query-list" id="countryList"></ul>
+
+        <div class="panel-title">How they arrived</div>
         <div id="channelBars"></div>
-        <div class="legend-note">Share of sessions by how people arrived — direct (typed URL / bookmark), organic search, paid search (Google Ads), referral (linked from another site).</div>
+        <div class="panel-note">Direct = typed the address, a bookmark, or a bot. Organic Search = a normal Google result. Paid Search = clicked a Google Ads advert. Referral = a link on another website.</div>
 
-        <div class="panel-title" style="margin-top:22px;">Exactly where sessions came from</div>
+        <div class="panel-title">Exactly where they came from</div>
         <ul class="query-list" id="sourceList"></ul>
-
-        <div class="panel-title" style="margin-top:22px;">Top search terms (Search Console)</div>
-        <ul class="query-list" id="queryList"></ul>
       </div>
       <div>
-        <div class="panel-title">Top landing pages</div>
-        <table class="sessions">
-          <thead>
-            <tr><th>Page</th><th>Sessions</th><th>Avg. time</th><th>New visitors</th><th>Contacted</th></tr>
-          </thead>
-          <tbody id="sessionRows"></tbody>
-        </table>
+        <div class="panel-title">What people searched on Google</div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead><tr><th>Search</th><th class="num">Shown</th><th class="num">Clicked</th><th class="num">Position</th></tr></thead>
+            <tbody id="termRows"></tbody>
+          </table>
+        </div>
+        <div class="panel-note" id="termNote"></div>
+
+        <div class="panel-title">Pages people landed on</div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead><tr><th>Page</th><th class="num">Visits</th><th class="num">Real</th><th class="num">Avg. time</th><th class="num">New</th><th class="num">Messages</th></tr></thead>
+            <tbody id="landingRows"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
 
-  <footer id="footerNote">
-    Data pulled live from the Google Analytics 4 Data API + Search Console API (sessions, channel group, landing pages, engagement time, new‑vs‑returning). No raw IP addresses are collected or shown anywhere — Google does not expose them, and Isle of Man data protection law treats them as personal data. Individual visitor-by-visitor session logs aren't available from this API without a BigQuery export, so this shows real aggregated numbers rather than a session-by-session list.
+  <footer>
+    <p><strong>Real visits</strong> = Google Analytics "engaged sessions": the visitor stayed 10+ seconds, viewed 2+ pages, or contacted you. Visits that leave instantly are mostly bots and crawlers (they tend to show up as "direct" from the USA, Asia or "(not set)"), so they're counted in the total but not as real.</p>
+    <p><strong>Messages</strong> counts only contact-form sends that Google Analytics records. Opening the contact page is shown separately and is not a message.</p>
+    <p>Everything comes live from the Google Analytics 4 Data API and the Search Console API. Use the "Check in Google Analytics" link on any site to compare these numbers against Google's own screens. No IP addresses are collected or shown, because Google doesn't expose them.</p>
   </footer>
 
 </div>
 
 <script>
-// ---------------------------------------------------------------------------
-// Config
-// ---------------------------------------------------------------------------
 const CLIENT_ID = '105622061315-vkgd0n8ogfjnbg475eoj2e7m0p2l20o4.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/userinfo.email';
 const TOKEN_STORAGE_KEY = 'dgc_dash_token_v1';
+const REQUIRED_ACCOUNT = 'usiom.business@gmail.com';
+const EVER_CONNECTED_KEY = 'dgc_dash_ever_connected_v1';
 
+// Pinned, not discovered by domain: the account holds more than one property mentioning dgc.im,
+// and domain matching silently picked an empty one. Verified 24 Sep 2026 against each site's live tag.
 const SITE_DEFS = [
-  { id: 'dgc', name: 'DGC Ltd', domain: 'dgc.im', color: 'var(--site-dgc)' },
-  { id: 'manx', name: 'Manx Drain Solutions', domain: 'manxdrainsolutions.com', color: 'var(--site-manx)' },
-  { id: 'silverdale', name: 'Silverdale Limited', domain: 'silverdale.im', color: 'var(--site-silverdale)' },
+  { id: 'dgc', name: 'DGC Ltd', domain: 'dgc.im', color: 'var(--site-dgc)', propertyId: '477291287', scUrl: 'sc-domain:dgc.im' },
+  { id: 'manx', name: 'Manx Drain Solutions', domain: 'manxdrainsolutions.com', color: 'var(--site-manx)', propertyId: '373340845', scUrl: 'https://manxdrainsolutions.com/' },
+  { id: 'silverdale', name: 'Silverdale Limited', domain: 'silverdale.im', color: 'var(--site-silverdale)', propertyId: '496195002', scUrl: 'https://www.silverdale.im/' },
 ];
+
+const MESSAGE_EVENTS = ['generate_lead', 'manual_event_SUBMIT_LEAD_FORM', 'submit_lead_form', 'ads_conversion_Form_1'];
+const EVENT_LABELS = {
+  generate_lead: 'Sent a message (contact form)',
+  manual_event_SUBMIT_LEAD_FORM: 'Sent a message (contact form)',
+  submit_lead_form: 'Sent a message (contact form)',
+  ads_conversion_Form_1: 'Submitted a form (Google Ads goal)',
+  contact: 'Tapped the phone number or email',
+  ads_conversion_Contact_Page_load_https_1: 'Opened the contact page (not a message)',
+  ads_conversion_Contact_Us_1: 'Google Ads "Contact Us" goal fired',
+  form_start: 'Started filling in the form',
+};
+const CONTACT_EVENTS = Object.keys(EVENT_LABELS);
+const STALE_AFTER_DAYS = 3;
+const BURIED_POSITION = 30;
+const REQUEST_TIMEOUT_MS = 25000;
 
 const RANGE_DAYS = { today: 1, '7d': 7, '30d': 30 };
 let currentRange = '7d';
 let accessToken = null;
 let tokenClient = null;
-let siteState = {}; // id -> { propertyId, measurementId, data, error, scLoading, scUrl }
+let openSiteId = null;
+let siteState = {};
+let loadSeq = 0;
+
+const esc = (v) => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 // ---------------------------------------------------------------------------
 // Auth
 // ---------------------------------------------------------------------------
 function saveToken(token, expiresInSec) {
-  const expiresAt = Date.now() + (expiresInSec * 1000) - 60000; // 1 min safety margin
+  const expiresAt = Date.now() + (expiresInSec * 1000) - 60000;
   try { localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify({ token, expiresAt })); } catch (e) {}
 }
 function loadStoredToken() {
@@ -312,15 +343,15 @@ function loadStoredToken() {
 function clearStoredToken() {
   try { localStorage.removeItem(TOKEN_STORAGE_KEY); } catch (e) {}
 }
+function everConnected() {
+  try { return localStorage.getItem(EVER_CONNECTED_KEY) === '1'; } catch (e) { return false; }
+}
 
 function setStatus(kind, html) {
   const el = document.getElementById('statusBanner');
   el.className = 'status-banner' + (kind === 'err' ? ' err' : '');
   el.innerHTML = `<span class="dot ${kind}"></span><span>${html}</span>`;
 }
-
-const REQUIRED_ACCOUNT = 'usiom.business@gmail.com';
-const EVER_CONNECTED_KEY = 'dgc_dash_ever_connected_v1';
 
 function initGoogle() {
   if (!window.google || !google.accounts || !google.accounts.oauth2) {
@@ -333,16 +364,15 @@ function initGoogle() {
     hint: REQUIRED_ACCOUNT,
     callback: (resp) => {
       if (resp.error) {
-        // Silent attempt failed (needs a real click) — fall back to the visible button quietly.
         if (resp.error === 'interaction_required' || resp.error === 'immediate_failed') {
           setStatus('muted', 'Not connected yet — click <strong>Connect Google account</strong> above to sign back in (happens roughly once a week while this app is in Google\'s testing mode).');
           return;
         }
         if (resp.error === 'access_denied') {
-          setStatus('err', `Access denied — this only works signed in as <strong>${REQUIRED_ACCOUNT}</strong>. Click Connect Google account and pick that account specifically (use "Switch account" below if it grabbed the wrong one).`);
+          setStatus('err', `Access denied — this only works signed in as <strong>${REQUIRED_ACCOUNT}</strong>. Click Connect Google account and pick that account specifically.`);
           return;
         }
-        setStatus('err', `Sign-in failed: <strong>${resp.error}</strong>. Try Connect again.`);
+        setStatus('err', `Sign-in failed: <strong>${esc(resp.error)}</strong>. Try Connect again.`);
         return;
       }
       try { localStorage.setItem(EVER_CONNECTED_KEY, '1'); } catch (e) {}
@@ -356,24 +386,14 @@ function initGoogle() {
   if (stored) {
     accessToken = stored;
     onSignedIn();
-  } else if (localStorage.getItem(EVER_CONNECTED_KEY) === '1') {
-    // Only attempt a silent, no-click re-auth if THIS browser has completed a real sign-in
-    // before (so we know the right account already granted consent) — never auto-attempt on
-    // a first-ever visit, since that can silently grab whatever Google account happens to be
-    // active in the browser and hit an access-denied wall with no clear way out.
+  } else if (everConnected()) {
+    // Silent re-auth only once this browser has completed a real sign-in; on a first visit it can
+    // grab whichever Google account happens to be active and dead-end on an access-denied page.
     tokenClient.requestAccessToken({ prompt: '' });
   }
 
-  // signInBtn may already be gone from the DOM at this point — onSignedIn() (called above,
-  // synchronously, if a stored token existed) replaces #authBox's innerHTML and removes it.
-  // Guard instead of assuming it's still there, which used to throw here and silently abort
-  // the rest of initGoogle() (including, on some paths, leaving later setup incomplete).
   const btn = document.getElementById('signInBtn');
-  if (btn) {
-    btn.addEventListener('click', () => {
-      tokenClient.requestAccessToken({ prompt: 'consent' });
-    });
-  }
+  if (btn) btn.addEventListener('click', () => tokenClient.requestAccessToken({ prompt: 'consent' }));
 }
 
 async function onSignedIn() {
@@ -391,202 +411,172 @@ async function onSignedIn() {
     tokenClient.requestAccessToken({ prompt: 'select_account' });
   });
 
-  // Show exactly which Google account is connected, in plain sight, at all times —
-  // this is the only way to catch a wrong-account mix-up before it shows misleading data.
+  setStatus('live', 'Connected. Loading real data from Google Analytics…');
+  loadAllSites(false);
+
   try {
     const info = await gfetch('https://www.googleapis.com/oauth2/v3/userinfo');
     const label = document.querySelector('.signed-in-as');
     if (label) label.textContent = 'Connected as ' + info.email;
     if (info.email !== REQUIRED_ACCOUNT) {
-      setStatus('err', `Warning: signed in as <strong>${info.email}</strong>, not ${REQUIRED_ACCOUNT}. Data below belongs to the wrong Google account — click Switch account and pick the right one.`);
+      setStatus('err', `Warning: signed in as <strong>${esc(info.email)}</strong>, not ${REQUIRED_ACCOUNT}. Click Switch account and pick the right one.`);
     }
-  } catch (e) { /* non-fatal — carry on without the email label */ }
-
-  setStatus('live', 'Connected. Loading real data from Google Analytics…');
-  loadAllSites(false);
+  } catch (e) { /* label is cosmetic */ }
 }
 
 // ---------------------------------------------------------------------------
 // Google API helpers
 // ---------------------------------------------------------------------------
 async function gfetch(url, opts) {
-  const res = await fetch(url, {
-    ...opts,
-    headers: { ...(opts && opts.headers), Authorization: `Bearer ${accessToken}` },
-  });
+  let res;
+  try {
+    res = await fetch(url, {
+      ...opts,
+      headers: { ...(opts && opts.headers), Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+  } catch (e) {
+    throw new Error(e.name === 'TimeoutError' ? 'Google took too long to answer — press Refresh data to try again.' : 'Network problem reaching Google — check the connection and press Refresh data.');
+  }
   if (res.status === 401) {
     accessToken = null;
     clearStoredToken();
     throw new Error('Google sign-in expired — click Connect Google account again (or Refresh, it may sort itself out silently).');
   }
   const body = await res.json();
-  if (!res.ok) {
-    throw new Error((body.error && body.error.message) || `Request failed (${res.status})`);
-  }
+  if (!res.ok) throw new Error((body.error && body.error.message) || `Request failed (${res.status})`);
   return body;
 }
 
-async function discoverProperties() {
-  const data = await gfetch('https://analyticsadmin.googleapis.com/v1beta/accountSummaries?pageSize=200');
-  const props = [];
-  for (const acct of data.accountSummaries || []) {
-    for (const p of acct.propertySummaries || []) props.push(p);
-  }
-  const matches = {};
-  await Promise.all(props.map(async (p) => {
-    try {
-      const ds = await gfetch(`https://analyticsadmin.googleapis.com/v1beta/${p.property}/dataStreams`);
-      for (const stream of ds.dataStreams || []) {
-        const uri = (stream.webStreamData && stream.webStreamData.defaultUri) || '';
-        for (const site of SITE_DEFS) {
-          if (uri.includes(site.domain)) {
-            matches[site.id] = {
-              propertyId: p.property.split('/')[1],
-              measurementId: stream.webStreamData && stream.webStreamData.measurementId,
-              displayName: p.displayName,
-            };
-          }
-        }
-      }
-    } catch (e) { /* skip properties we can't read streams for */ }
-  }));
-  return matches;
-}
+const postJSON = (url, body) => gfetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 
-async function discoverSearchConsoleSites() {
-  try {
-    const data = await gfetch('https://www.googleapis.com/webmasters/v3/sites');
-    const entries = data.siteEntry || [];
-    const matches = {};
-    for (const site of SITE_DEFS) {
-      const hit = entries.find(e => e.siteUrl.includes(site.domain));
-      if (hit) matches[site.id] = hit.siteUrl;
-    }
-    return matches;
-  } catch (e) {
-    return {};
-  }
-}
-
-function dateNDaysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0, 10);
+// All three GA4 properties report in GMT/UTC, so UTC calendar days line up with GA4's "date".
+function utcDay(nDaysAgo) { return new Date(Date.now() - nDaysAgo * 86400000).toISOString().slice(0, 10); }
+function gaDate(nDaysAgo) { return nDaysAgo === 0 ? 'today' : `${nDaysAgo}daysAgo`; }
+function fmtDate(yyyymmdd) {
+  const d = new Date(Date.UTC(+yyyymmdd.slice(0, 4), +yyyymmdd.slice(4, 6) - 1, +yyyymmdd.slice(6, 8)));
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: d.getUTCFullYear() === new Date().getUTCFullYear() ? undefined : 'numeric', timeZone: 'UTC' });
 }
 
 async function runGA4Reports(propertyId, days) {
-  const body = {
-    requests: [
-      { // A: daily sessions over 2x the range, for sparkline + delta
-        dateRanges: [{ startDate: dateNDaysAgo(days * 2 - 1), endDate: 'today' }],
-        dimensions: [{ name: 'date' }],
-        metrics: [{ name: 'sessions' }],
-        orderBys: [{ dimension: { dimensionName: 'date' } }],
-      },
-      { // B: channel breakdown
-        dateRanges: [{ startDate: dateNDaysAgo(days - 1), endDate: 'today' }],
-        dimensions: [{ name: 'sessionDefaultChannelGroup' }],
-        metrics: [{ name: 'sessions' }],
-      },
-      { // C: new vs returning
-        dateRanges: [{ startDate: dateNDaysAgo(days - 1), endDate: 'today' }],
-        dimensions: [{ name: 'newVsReturning' }],
-        metrics: [{ name: 'sessions' }],
-      },
-      { // D: top landing pages, incl. real conversions (form submits / calls) per page
-        dateRanges: [{ startDate: dateNDaysAgo(days - 1), endDate: 'today' }],
-        dimensions: [{ name: 'landingPagePlusQueryString' }],
-        metrics: [{ name: 'sessions' }, { name: 'averageSessionDuration' }, { name: 'conversions' }],
-        orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
-        limit: 6,
-      },
-      { // E: real source/medium breakdown (more specific than the 4-bucket channel groups)
-        dateRanges: [{ startDate: dateNDaysAgo(days - 1), endDate: 'today' }],
-        dimensions: [{ name: 'sessionSourceMedium' }],
-        metrics: [{ name: 'sessions' }],
-        orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
-        limit: 8,
-      },
-    ],
-  };
-  const data = await gfetch(
-    `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:batchRunReports`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-  );
-  return data.reports;
+  const base = `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}`;
+  const range = [{ startDate: gaDate(days - 1), endDate: 'today' }];
+  const both = [{ name: 'sessions' }, { name: 'engagedSessions' }];
+  const bySessions = [{ metric: { metricName: 'sessions' }, desc: true }];
+  const [r1, r2, live] = await Promise.all([
+    postJSON(`${base}:batchRunReports`, { requests: [
+      { dateRanges: [{ startDate: gaDate(days * 2 - 1), endDate: 'today' }], dimensions: [{ name: 'date' }], metrics: both },
+      { dateRanges: range, dimensions: [{ name: 'sessionDefaultChannelGroup' }], metrics: both },
+      { dateRanges: range, dimensions: [{ name: 'sessionSourceMedium' }], metrics: both, orderBys: bySessions, limit: 10 },
+      { dateRanges: range, dimensions: [{ name: 'landingPagePlusQueryString' }], metrics: [...both, { name: 'averageSessionDuration' }, { name: 'newUsers' }, { name: 'totalUsers' }], orderBys: bySessions, limit: 8 },
+      { dateRanges: range, dimensions: [{ name: 'country' }], metrics: both, orderBys: bySessions, limit: 10 },
+    ] }).then(d => d.reports),
+    postJSON(`${base}:batchRunReports`, { requests: [
+      { dateRanges: range, dimensions: [{ name: 'eventName' }, { name: 'date' }], metrics: [{ name: 'eventCount' }], dimensionFilter: { filter: { fieldName: 'eventName', inListFilter: { values: CONTACT_EVENTS } } } },
+      { dateRanges: [{ startDate: '2020-01-01', endDate: 'today' }], dimensions: [{ name: 'date' }], metrics: [{ name: 'sessions' }], orderBys: [{ dimension: { dimensionName: 'date' }, desc: true }], limit: 1 },
+      { dateRanges: range, dimensions: [{ name: 'landingPagePlusQueryString' }], metrics: [{ name: 'eventCount' }], dimensionFilter: { filter: { fieldName: 'eventName', inListFilter: { values: MESSAGE_EVENTS } } } },
+    ] }).then(d => d.reports),
+    postJSON(`${base}:runRealtimeReport`, { metrics: [{ name: 'activeUsers' }] }).catch(() => null),
+  ]);
+  return { r1, r2, live };
 }
 
 async function runSearchConsole(siteUrl, days) {
-  const data = await gfetch(
+  const scDays = Math.max(days, 7);
+  const data = await postJSON(
     `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        startDate: dateNDaysAgo(days - 1),
-        endDate: dateNDaysAgo(0),
-        dimensions: ['query'],
-        rowLimit: 6,
-      }),
-    }
+    { startDate: utcDay(scDays - 1), endDate: utcDay(0), dimensions: ['query'], rowLimit: 100, dataState: 'all' }
   );
-  return (data.rows || []).map(r => ({ term: r.keys[0], count: Math.round(r.clicks) || Math.round(r.impressions * r.ctr) || 0 }));
+  const all = (data.rows || []).map(r => ({ term: r.keys[0], clicks: r.clicks, shown: r.impressions, pos: r.position }));
+  all.sort((a, b) => b.clicks - a.clicks || b.shown - a.shown);
+  // Page 4+ appearances are Google loosely matching a page to a far-off search (e.g. an Isle of Man
+  // bathroom project vs "bathroom renovation ashby-de-la-zouch"); nobody scrolls that far.
+  const visible = all.filter(t => t.clicks > 0 || t.pos <= BURIED_POSITION);
+  const buried = all.filter(t => !(t.clicks > 0 || t.pos <= BURIED_POSITION));
+  return {
+    scDays,
+    terms: visible.slice(0, 12),
+    buried,
+    totalClicks: all.reduce((a, t) => a + t.clicks, 0),
+    termCount: all.length,
+  };
 }
 
-const CHANNEL_COLOR = {
-  'Direct': 'var(--ch-direct)',
-  'Organic Search': 'var(--ch-organic)',
-  'Paid Search': 'var(--ch-paid)',
-  'Paid Social': 'var(--ch-paid)',
-  'Organic Social': 'var(--ch-organic)',
-  'Referral': 'var(--ch-referral)',
-  'Email': 'var(--ch-referral)',
-  'Unassigned': 'var(--ch-other)',
-};
+const rowsOf = (report) => (report && report.rows) || [];
+const dimOf = (r, i = 0) => r.dimensionValues[i].value;
+const metOf = (r, i = 0) => Number(r.metricValues[i].value);
 
-function shapeReports(reports, days) {
-  const [daily, channel, newRet, landing, sources] = reports;
+function shapeReports({ r1, r2, live }, days) {
+  const [daily, channel, source, landing, country] = r1;
+  const [events, lastSeen, landingMsgs] = r2;
 
-  const dailyRows = (daily.rows || []).map(r => ({ date: r.dimensionValues[0].value, sessions: Number(r.metricValues[0].value) }));
-  const recent = dailyRows.slice(-days);
-  const prior = dailyRows.slice(0, Math.max(dailyRows.length - days, 0));
-  const todaySessions = recent.length ? recent[recent.length - 1].sessions : 0;
-  const weekSessions = recent.reduce((a, r) => a + r.sessions, 0);
-  const priorSessions = prior.reduce((a, r) => a + r.sessions, 0);
-  let weekDelta = null;
-  if (priorSessions > 0) weekDelta = Math.round(((weekSessions - priorSessions) / priorSessions) * 100);
-  else if (weekSessions > 0) weekDelta = null; // no prior period to compare against
+  // GA4 omits days with no data, so build the calendar explicitly — otherwise "today" can
+  // silently show an older day's figure.
+  const byDate = {};
+  for (const r of rowsOf(daily)) byDate[dimOf(r)] = { sessions: metOf(r, 0), real: metOf(r, 1) };
+  const series = [];
+  for (let n = days * 2 - 1; n >= 0; n--) {
+    const key = utcDay(n).replace(/-/g, '');
+    series.push({ date: key, ...(byDate[key] || { sessions: 0, real: 0 }) });
+  }
+  const recent = series.slice(-days);
+  const prior = series.slice(0, days);
+  const sum = (arr, k) => arr.reduce((a, x) => a + x[k], 0);
+  const today = series[series.length - 1];
 
-  const spark = recent.map(r => r.sessions);
-  while (spark.length < 2) spark.push(0);
+  const periodReal = sum(recent, 'real');
+  const periodSessions = sum(recent, 'sessions');
+  const priorReal = sum(prior, 'real');
+  const priorSessions = sum(prior, 'sessions');
+  const delta = priorReal > 0 ? Math.round(((periodReal - priorReal) / priorReal) * 100) : null;
 
-  const channelRows = (channel.rows || []).map(r => ({
-    label: r.dimensionValues[0].value,
-    sessions: Number(r.metricValues[0].value),
+  const pairRows = (report) => rowsOf(report).map(r => ({ label: dimOf(r), sessions: metOf(r, 0), real: metOf(r, 1) }));
+  const channels = pairRows(channel).sort((a, b) => b.sessions - a.sessions);
+  const sources = pairRows(source);
+  const countries = pairRows(country);
+  const iom = countries.find(c => c.label === 'Isle of Man');
+
+  const eventTotals = {};
+  for (const r of rowsOf(events)) {
+    const name = dimOf(r, 0);
+    const e = eventTotals[name] || (eventTotals[name] = { total: 0, byDate: {} });
+    e.total += metOf(r);
+    e.byDate[dimOf(r, 1)] = (e.byDate[dimOf(r, 1)] || 0) + metOf(r);
+  }
+  const messages = MESSAGE_EVENTS.reduce((a, n) => a + ((eventTotals[n] && eventTotals[n].total) || 0), 0);
+
+  const msgsByPage = {};
+  for (const r of rowsOf(landingMsgs)) msgsByPage[dimOf(r)] = metOf(r);
+  const landingRows = rowsOf(landing).map(r => ({
+    page: dimOf(r),
+    sessions: metOf(r, 0),
+    real: metOf(r, 1),
+    avgSeconds: metOf(r, 2),
+    newShare: metOf(r, 4) > 0 ? metOf(r, 3) / metOf(r, 4) : null,
+    messages: msgsByPage[dimOf(r)] || 0,
   }));
-  const channelTotal = channelRows.reduce((a, r) => a + r.sessions, 0) || 1;
-  const channels = channelRows
-    .sort((a, b) => b.sessions - a.sessions)
-    .map(r => ({ label: r.label, value: r.sessions / channelTotal, color: CHANNEL_COLOR[r.label] || 'var(--ch-other)' }));
 
-  const newRetRows = (newRet.rows || []).map(r => ({ label: r.dimensionValues[0].value, sessions: Number(r.metricValues[0].value) }));
-  const newCount = newRetRows.find(r => r.label === 'new');
-  const newRetTotal = newRetRows.reduce((a, r) => a + r.sessions, 0) || 1;
-  const newShare = newCount ? newCount.sessions / newRetTotal : null;
+  const lastRow = rowsOf(lastSeen)[0];
+  const lastDataDate = lastRow ? dimOf(lastRow) : null;
+  let health = null;
+  if (!lastDataDate) {
+    health = 'Google Analytics has <strong>never received a single visit</strong> for this site. The website\'s tracking code isn\'t sending data here, so the zeros below are not real.';
+  } else {
+    const ageDays = Math.floor((Date.parse(utcDay(0)) - Date.UTC(+lastDataDate.slice(0, 4), +lastDataDate.slice(4, 6) - 1, +lastDataDate.slice(6, 8))) / 86400000);
+    if (ageDays >= STALE_AFTER_DAYS) {
+      health = `<strong>Tracking broken:</strong> no visits have reached Google Analytics since <strong>${fmtDate(lastDataDate)}</strong>. The website isn't sending data to this property, so the zeros below are not real.`;
+    }
+  }
 
-  const landingRows = (landing.rows || []).map(r => ({
-    page: r.dimensionValues[0].value,
-    sessions: Number(r.metricValues[0].value),
-    avgSeconds: Number(r.metricValues[1].value),
-    conversions: Number(r.metricValues[2].value),
-  }));
+  const liveNow = live && live.rows && live.rows.length ? metOf(live.rows[0]) : 0;
 
-  const sourceRows = (sources.rows || []).map(r => ({
-    label: r.dimensionValues[0].value,
-    sessions: Number(r.metricValues[0].value),
-  }));
-
-  return { todaySessions, weekSessions, weekDelta, spark, channels, newShare, landingRows, sourceRows };
+  return {
+    todayReal: today.real, todaySessions: today.sessions,
+    periodReal, periodSessions, priorReal, priorSessions, delta,
+    spark: recent.map(r => r.real),
+    channels, sources, countries, iomReal: iom ? iom.real : 0,
+    eventTotals, messages, landingRows, health, liveNow,
+  };
 }
 
 function fmtDuration(sec) {
@@ -600,59 +590,39 @@ function fmtDuration(sec) {
 // ---------------------------------------------------------------------------
 async function loadAllSites(isRefresh) {
   const days = RANGE_DAYS[currentRange];
+  const seq = ++loadSeq;
   document.querySelectorAll('.range-btn').forEach(b => b.disabled = true);
+  setStatus('live', `Loading ${days === 1 ? 'today' : 'the last ' + days + ' days'}…`);
+  let firstError = null;
 
   try {
-    if (!siteState.__discovered) {
-      setStatus('live', 'Finding your Analytics properties…');
-      const gaMatches = await discoverProperties();
-      const scMatches = await discoverSearchConsoleSites();
-      for (const site of SITE_DEFS) {
-        siteState[site.id] = {
-          ...site,
-          ...(gaMatches[site.id] || {}),
-          scUrl: scMatches[site.id] || null,
-          data: null,
-          error: gaMatches[site.id] ? null : 'No matching Analytics property found for this domain under the connected account.',
-        };
-      }
-      siteState.__discovered = true;
-    }
-
-    renderCards(); // render skeleton / whatever we have so far
-
-    await Promise.all(SITE_DEFS.map(async (site) => {
-      const s = siteState[site.id];
-      if (!s.propertyId) return;
-      try {
-        const reports = await runGA4Reports(s.propertyId, days);
-        s.data = shapeReports(reports, days);
-        s.error = null;
-      } catch (e) {
-        s.error = e.message;
-      }
-      if (s.scUrl) {
-        try { s.data = s.data || {}; s.data.queries = await runSearchConsole(s.scUrl, days); }
-        catch (e) { s.data = s.data || {}; s.data.queries = []; s.data.queriesError = e.message; }
-      }
+    const results = await Promise.all(SITE_DEFS.map(async (site) => {
+      const out = { data: null, error: null, search: null, searchError: null };
+      try { out.data = shapeReports(await runGA4Reports(site.propertyId, days), days); }
+      catch (e) { out.error = e.message; firstError = firstError || e; }
+      try { out.search = await runSearchConsole(site.scUrl, days); }
+      catch (e) { out.searchError = e.message; }
+      return [site.id, out];
     }));
+    if (seq !== loadSeq) return;
+    siteState = Object.fromEntries(results);
 
-    setStatus('live', `Connected — showing real data for the ${days === 1 ? 'current day' : 'last ' + days + ' days'}.`);
+    if (firstError && /expired/i.test(firstError.message)) throw firstError;
+
+    setStatus('live', `Connected — showing real data for ${days === 1 ? 'today' : 'the last ' + days + ' days'}.`);
     document.getElementById('lastUpdated').textContent = 'Last updated ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     renderCards();
+    if (openSiteId) openDetail(openSiteId, false);
   } catch (e) {
-    // A locally-cached token can look valid (per its stored expiry) but still get rejected by
-    // Google server-side. Self-heal once with a silent re-auth instead of dead-ending on an
-    // error message — this is exactly the case that used to strand people on a stale error.
-    const looksExpired = /expired/i.test(e.message);
-    if (looksExpired && !isRefresh && localStorage.getItem(EVER_CONNECTED_KEY) === '1') {
+    // A cached token can look valid locally but still be rejected by Google; self-heal once silently.
+    if (/expired/i.test(e.message) && !isRefresh && everConnected()) {
       setStatus('live', 'Sign-in needed a silent refresh — retrying…');
       tokenClient.requestAccessToken({ prompt: '' });
       return;
     }
-    setStatus('err', `Couldn't load data: <strong>${e.message}</strong>. Try Refresh, or Connect Google account again if the sign-in expired.`);
+    setStatus('err', `Couldn't load data: <strong>${esc(e.message)}</strong>. Try Refresh, or Connect Google account again if the sign-in expired.`);
   } finally {
-    document.querySelectorAll('.range-btn').forEach(b => b.disabled = false);
+    if (seq === loadSeq) document.querySelectorAll('.range-btn').forEach(b => b.disabled = false);
   }
 }
 
@@ -660,113 +630,161 @@ async function loadAllSites(isRefresh) {
 // Rendering
 // ---------------------------------------------------------------------------
 function sparkPath(values, w, h) {
-  const max = Math.max(...values, 1), min = 0;
+  const max = Math.max(...values, 1);
   const step = w / Math.max(values.length - 1, 1);
-  const pts = values.map((v, i) => {
-    const x = i * step;
-    const y = h - ((v - min) / (max - min || 1)) * (h - 4) - 2;
-    return [x, y];
-  });
+  const pts = values.map((v, i) => [i * step, h - (v / max) * (h - 4) - 2]);
   const line = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
-  const area = line + ` L${w},${h} L0,${h} Z`;
-  return { line, area };
+  return { line, area: line + ` L${w},${h} L0,${h} Z` };
+}
+
+function cardHead(def) {
+  return `<div class="site-card-head"><span class="site-swatch" style="background:${def.color}"></span><span class="site-name">${def.name}</span><span class="site-domain">${def.domain}</span></div>`;
 }
 
 function renderCards() {
   const el = document.getElementById('siteCards');
+  const days = RANGE_DAYS[currentRange];
   el.innerHTML = SITE_DEFS.map(def => {
-    const s = siteState[def.id] || def;
-    const color = def.color;
-
-    if (!siteState.__discovered) {
-      return `<div class="site-card skeleton"><div class="site-card-head"><span class="site-swatch" style="background:${color}"></span><span class="site-name">${def.name}</span><span class="site-domain">${def.domain}</span></div><div class="card-note">Connect Google to load…</div></div>`;
-    }
-    if (s.error && !s.data) {
-      return `<div class="site-card" data-site="${def.id}"><div class="site-card-head"><span class="site-swatch" style="background:${color}"></span><span class="site-name">${def.name}</span><span class="site-domain">${def.domain}</span></div><div class="card-note err">${s.error}</div></div>`;
-    }
-    if (!s.data) {
-      return `<div class="site-card skeleton"><div class="site-card-head"><span class="site-swatch" style="background:${color}"></span><span class="site-name">${def.name}</span><span class="site-domain">${def.domain}</span></div><div class="card-note">Loading…</div></div>`;
-    }
+    const s = siteState[def.id];
+    if (!s) return `<div class="site-card skeleton">${cardHead(def)}<div class="card-note">${accessToken ? 'Loading…' : 'Connect Google to load…'}</div></div>`;
+    if (s.error && !s.data) return `<div class="site-card">${cardHead(def)}<div class="card-note err">${esc(s.error)}</div></div>`;
 
     const d = s.data;
-    const { line, area } = sparkPath(d.spark, 280, 40);
-    const deltaHtml = d.weekDelta === null ? '' :
-      `<div class="stat-delta ${d.weekDelta < 0 ? 'neg' : ''}">${d.weekDelta > 0 ? '+' : ''}${d.weekDelta}% vs prior period</div>`;
+    const spark = d.spark.length > 1 ? d.spark : [0, ...d.spark];
+    const { line, area } = sparkPath(spark, 280, 40);
+    const deltaHtml = days > 1 && d.delta !== null
+      ? `<div class="stat-delta ${d.delta < 0 ? 'neg' : ''}">${d.delta > 0 ? '+' : ''}${d.delta}% vs previous ${days} days</div>` : '';
+    const secondLabel = days === 1 ? 'Yesterday' : `Last ${days} days`;
+    const secondReal = days === 1 ? d.priorReal : d.periodReal;
+    const secondTotal = days === 1 ? d.priorSessions : d.periodSessions;
 
     return `
-    <div class="site-card" data-site="${def.id}" tabindex="0" role="button" aria-expanded="false">
-      <div class="site-card-head">
-        <span class="site-swatch" style="background:${color}"></span>
-        <span class="site-name">${def.name}</span>
-        <span class="site-domain">${def.domain}</span>
-      </div>
+    <div class="site-card${openSiteId === def.id ? ' selected' : ''}" data-site="${def.id}" tabindex="0" role="button" aria-expanded="${openSiteId === def.id}">
+      ${cardHead(def)}
+      ${d.health ? `<div class="health">${d.health}</div>` : ''}
       <div class="stat-row">
         <div class="stat-tile">
-          <div class="stat-label">Today</div>
-          <div class="stat-value">${d.todaySessions}</div>
+          <div class="stat-label">Real visits today</div>
+          <div class="stat-value">${d.todayReal}</div>
         </div>
         <div class="stat-tile">
-          <div class="stat-label">This period</div>
-          <div class="stat-value">${d.weekSessions}</div>
+          <div class="stat-label">${secondLabel}</div>
+          <div class="stat-value">${secondReal}</div>
           ${deltaHtml}
         </div>
       </div>
-      <svg class="spark" viewBox="0 0 280 40" preserveAspectRatio="none">
-        <path class="spark-area" d="${area}" fill="${color}"></path>
-        <path class="spark-line" d="${line}" stroke="${color}"></path>
+      <div class="stat-sub">${secondTotal} total visits ${days === 1 ? 'yesterday' : 'in this period'}, ${secondTotal - secondReal} left within 10 seconds (bots or instant exits)</div>
+      <svg class="spark" viewBox="0 0 280 40" preserveAspectRatio="none" aria-label="Real visits per day">
+        <path class="spark-area" d="${area}" fill="${def.color}"></path>
+        <path class="spark-line" d="${line}" stroke="${def.color}"></path>
       </svg>
-      <div class="expand-hint">Click to see search terms, traffic sources and landing pages →</div>
+      <div class="mini-row">
+        <span>Messages sent: <strong>${d.messages}</strong></span>
+        <span>Real visits from Isle of Man: <strong>${d.iomReal}</strong></span>
+        <span>On site now: <strong>${d.liveNow}</strong></span>
+      </div>
+      <div class="expand-hint">Click for enquiries, search terms, locations and pages →</div>
     </div>`;
   }).join('');
 
   el.querySelectorAll('.site-card[data-site]').forEach(card => {
-    card.addEventListener('click', () => openDetail(card.dataset.site));
-    card.addEventListener('keypress', e => { if (e.key === 'Enter') openDetail(card.dataset.site); });
+    card.addEventListener('click', () => openDetail(card.dataset.site, true));
+    card.addEventListener('keypress', e => { if (e.key === 'Enter') openDetail(card.dataset.site, true); });
   });
 }
 
-function openDetail(siteId) {
+function openDetail(siteId, scroll) {
   const s = siteState[siteId];
   if (!s || !s.data) return;
+  openSiteId = siteId;
   const def = SITE_DEFS.find(x => x.id === siteId);
-  document.getElementById('detailTitle').textContent = def.name + ' — detail';
+  const d = s.data;
+  const days = RANGE_DAYS[currentRange];
+  const periodText = days === 1 ? 'today' : `last ${days} days`;
 
-  document.getElementById('channelBars').innerHTML = s.data.channels.length
-    ? s.data.channels.map(c => `
+  document.getElementById('detailTitle').textContent = `${def.name} — ${periodText}`;
+  document.getElementById('detailLinks').innerHTML =
+    `<a href="https://analytics.google.com/analytics/web/#/p${def.propertyId}/reports/intelligenthome" target="_blank" rel="noopener">Check in Google Analytics ↗</a>` +
+    `<a href="https://search.google.com/search-console/performance/search-analytics?resource_id=${encodeURIComponent(def.scUrl)}" target="_blank" rel="noopener">Check in Search Console ↗</a>`;
+
+  const enquiryNames = CONTACT_EVENTS.filter(n => d.eventTotals[n]);
+  document.getElementById('enquiryList').innerHTML = enquiryNames.length
+    ? enquiryNames.map(n => {
+        const e = d.eventTotals[n];
+        const dates = Object.keys(e.byDate).sort().reverse().map(k => `${fmtDate(k)}: ${e.byDate[k]}`).join(', ');
+        return `<li><span class="query-term">${esc(EVENT_LABELS[n])}<br><span class="panel-note">${dates}</span></span><span class="query-count">${e.total}</span></li>`;
+      }).join('')
+    : `<li class="empty-note">No contact-form sends, phone taps or contact-page visits recorded ${periodText}.</li>`;
+
+  document.getElementById('countryList').innerHTML = d.countries.length
+    ? d.countries.map(c => `<li><span class="query-term">${esc(c.label)}</span><span class="query-count">${c.real} real <span class="muted">/ ${c.sessions} total</span></span></li>`).join('')
+    : '<li class="empty-note">No visits in this period.</li>';
+
+  const chTotal = d.channels.reduce((a, c) => a + c.sessions, 0) || 1;
+  const CHANNEL_COLOR = { 'Direct': 'var(--ch-direct)', 'Organic Search': 'var(--ch-organic)', 'Paid Search': 'var(--ch-paid)', 'Paid Social': 'var(--ch-paid)', 'Organic Social': 'var(--ch-organic)', 'Referral': 'var(--ch-referral)' };
+  document.getElementById('channelBars').innerHTML = d.channels.length
+    ? d.channels.map(c => `
       <div class="chan-row">
-        <span class="chan-label">${c.label}</span>
-        <span class="chan-track"><span class="chan-fill" style="width:${(c.value*100).toFixed(0)}%;background:${c.color}"></span></span>
-        <span class="chan-value">${(c.value*100).toFixed(0)}%</span>
+        <span class="chan-label">${esc(c.label)}</span>
+        <span class="chan-track"><span class="chan-fill" style="width:${(c.sessions / chTotal * 100).toFixed(0)}%;background:${CHANNEL_COLOR[c.label] || 'var(--ch-other)'}"></span></span>
+        <span class="chan-value">${c.real} real / ${c.sessions}</span>
       </div>`).join('')
-    : '<div class="empty-note">No channel data for this period.</div>';
+    : '<div class="empty-note">No visits in this period.</div>';
 
-  document.getElementById('sourceList').innerHTML = s.data.sourceRows && s.data.sourceRows.length
-    ? s.data.sourceRows.map(r => `<li><span class="query-term">${r.label}</span><span class="query-count">${r.sessions}</span></li>`).join('')
-    : '<li class="empty-note">No source data for this period.</li>';
+  document.getElementById('sourceList').innerHTML = d.sources.length
+    ? d.sources.map(r => `<li><span class="query-term">${esc(r.label)}</span><span class="query-count">${r.real} real <span class="muted">/ ${r.sessions} total</span></span></li>`).join('')
+    : '<li class="empty-note">No visits in this period.</li>';
 
-  const queries = s.data.queries;
-  document.getElementById('queryList').innerHTML =
-    !s.scUrl ? '<li class="empty-note">This site isn\'t connected in Search Console under this Google account.</li>' :
-    (queries && queries.length) ? queries.map(q => `<li><span class="query-term">${q.term}</span><span class="query-count">${q.count}</span></li>`).join('') :
-    '<li class="empty-note">No search query data for this period yet.</li>';
-
-  document.getElementById('sessionRows').innerHTML = s.data.landingRows && s.data.landingRows.length
-    ? s.data.landingRows.map(r => `
+  const termRows = document.getElementById('termRows');
+  const termNote = document.getElementById('termNote');
+  if (s.searchError) {
+    termRows.innerHTML = `<tr><td colspan="4" class="empty-note">Search Console error: ${esc(s.searchError)}</td></tr>`;
+    termNote.textContent = '';
+  } else if (!s.search || !s.search.terms.length) {
+    termRows.innerHTML = '<tr><td colspan="4" class="empty-note">Google hasn\'t shown this site for any searches in this period.</td></tr>';
+    termNote.textContent = '';
+  } else {
+    termRows.innerHTML = s.search.terms.map(t => `
       <tr>
-        <td class="source-cell">${r.page}</td>
-        <td>${r.sessions}</td>
-        <td>${fmtDuration(r.avgSeconds)}</td>
-        <td>${s.data.newShare === null ? '—' : Math.round(s.data.newShare * 100) + '%'}</td>
-        <td>${r.conversions > 0 ? `<span class="pill new">${r.conversions}</span>` : '—'}</td>
-      </tr>`).join('')
-    : '<tr><td colspan="5" class="empty-note">No landing page data for this period.</td></tr>';
+        <td>${esc(t.term)}</td>
+        <td class="num">${t.shown}</td>
+        <td class="num">${t.clicks > 0 ? `<span class="pill good">${t.clicks}</span>` : '0'}</td>
+        <td class="num">${t.pos.toFixed(0)}</td>
+      </tr>`).join('');
+    const buried = s.search.buried;
+    const buriedText = buried.length
+      ? ` Also appeared on page 4 or later (where nobody looks) for ${buried.length} other search${buried.length === 1 ? '' : 'es'}, e.g. "${esc(buried.slice(0, 2).map(t => t.term).join('", "'))}". Those are Google loosely matching a page, not real interest, so they're left out above.`
+      : '';
+    termNote.innerHTML = `Last ${s.search.scDays} days${days < s.search.scDays ? ' (search data needs at least a week to be useful)' : ''}. <strong>Shown</strong> = how many times this site appeared in Google results for that search. <strong>Clicked</strong> = how many people then clicked through. <strong>Position</strong> = average ranking (1 = top of page one; 11+ = page two or later). ${s.search.totalClicks} click${s.search.totalClicks === 1 ? '' : 's'} from ${s.search.termCount} different searches in total. Google reports search data 2–3 days late.${buriedText}`;
+  }
 
-  document.getElementById('detailPanel').classList.add('open');
-  document.getElementById('detailPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const pageLabel = (p) => p === '/' ? 'Home page (/)' : (p === '' || p === '(not set)' ? '(unknown — usually bots)' : p);
+  document.getElementById('landingRows').innerHTML = d.landingRows.length
+    ? d.landingRows.map(r => `
+      <tr>
+        <td>${esc(pageLabel(r.page))}</td>
+        <td class="num">${r.sessions}</td>
+        <td class="num">${r.real}</td>
+        <td class="num">${fmtDuration(r.avgSeconds)}</td>
+        <td class="num">${r.newShare === null ? '—' : Math.round(r.newShare * 100) + '%'}</td>
+        <td class="num">${r.messages > 0 ? `<span class="pill good">${r.messages}</span>` : '—'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" class="empty-note">No visits in this period.</td></tr>';
+
+  const panel = document.getElementById('detailPanel');
+  panel.classList.add('open');
+  document.querySelectorAll('.site-card[data-site]').forEach(c => {
+    const on = c.dataset.site === siteId;
+    c.classList.toggle('selected', on);
+    c.setAttribute('aria-expanded', on);
+  });
+  if (scroll) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 document.getElementById('closeDetail').addEventListener('click', () => {
+  openSiteId = null;
   document.getElementById('detailPanel').classList.remove('open');
+  document.querySelectorAll('.site-card.selected').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-expanded', 'false'); });
 });
 
 document.querySelectorAll('.range-btn').forEach(btn => {
@@ -776,6 +794,7 @@ document.querySelectorAll('.range-btn').forEach(btn => {
     btn.setAttribute('aria-pressed', 'true');
     currentRange = btn.dataset.range;
     if (accessToken) loadAllSites(true);
+    else if (tokenClient) tokenClient.requestAccessToken({ prompt: everConnected() ? '' : 'consent' });
   });
 });
 
