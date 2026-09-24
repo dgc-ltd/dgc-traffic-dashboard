@@ -1063,15 +1063,20 @@ function buildInsights(def, raw, s, days, titles) {
   const periodText = days === 1 ? 'today' : `in the last ${days} days`;
   const who = sourceFilter === 'all' ? '' : ` who ${chInfo(sourceFilter).who}`;
 
-  if (s.summary.health) out.push('This website isn\'t sending visitor numbers to Google at the moment, so there\'s nothing real to report until that\'s fixed.');
+  if (s.summary.health) {
+    out.push('This website isn\'t sending visitor numbers to Google at the moment, so the numbers below are zeros, not real results. People may well be visiting; we just can\'t see them until it\'s fixed.');
+    return out;
+  }
   if (sel.sessions === 0) { out.push(`Nobody${who} visited ${periodText}.`); return out; }
 
   out.push(`${plural(sel.real, 'real person', 'real people')}${who} visited ${periodText}${perDayText(sel.real, days) ? `, ${perDayText(sel.real, days)}` : ''}. The other ${Math.max(sel.sessions - sel.real, 0)} of the ${plural(sel.sessions, 'visit')} were robots or people who left straight away.`);
 
   if (sourceFilter === 'all') {
     const bySrc = [...new Set(current.map(g => g.ch))].map(ch => ({ ch, ...stats(current.filter(g => g.ch === ch)) }));
-    const top = bySrc.filter(r => r.real > 0).sort((a, b) => b.real - a.real)[0];
-    if (top) out.push(`Most real people ${chInfo(top.ch).who} (${top.real} of ${sel.real}).`);
+    const ranked = bySrc.filter(r => r.real > 0).sort((a, b) => b.real - a.real);
+    const tied = ranked.filter(r => ranked.length && r.real === ranked[0].real);
+    if (tied.length > 1) out.push(`Real people came in equal numbers from ${tied.map(r => chInfo(r.ch).label).join(' and ')} (${plural(tied[0].real, 'person', 'people')} each).`);
+    else if (ranked[0]) out.push(`Most real people ${chInfo(ranked[0].ch).who} (${ranked[0].real} of ${sel.real}).`);
     const readers = bySrc.filter(r => r.ch !== 'Unassigned' && r.real >= 3 && r.activePer).sort((a, b) => b.activePer - a.activePer);
     if (readers.length >= 2) {
       const hi = readers[0], lo = readers[readers.length - 1];
@@ -1087,7 +1092,7 @@ function buildInsights(def, raw, s, days, titles) {
   const msgs = ev.filter(e => MESSAGE_EVENTS.includes(e.name) && !isTestDay(def, e.date));
   const msgTotal = total(msgs, 'count');
   const testTotal = total(ev.filter(e => MESSAGE_EVENTS.includes(e.name) && isTestDay(def, e.date)), 'count');
-  const testNote = testTotal ? ` The ${plural(testTotal, 'other message')} (${[...new Set(ev.filter(e => MESSAGE_EVENTS.includes(e.name) && isTestDay(def, e.date)).map(e => e.date))].sort().map(fmtDate).join(', ')}) ${testTotal === 1 ? 'was' : 'were'} our own tests of the form, not customers.` : ''
+  const testNote = testTotal ? ` The ${plural(testTotal, 'message')} sent on ${[...new Set(ev.filter(e => MESSAGE_EVENTS.includes(e.name) && isTestDay(def, e.date)).map(e => e.date))].sort().map(fmtDate).join(', ')} ${testTotal === 1 ? 'was' : 'were'} our own tests of the form, not customers.` : ''
   const starts = total(ev.filter(e => e.name === 'form_start'), 'count');
   if (!def.messagesTracked) {
     out.push(starts ? `${plural(starts, 'person', 'people')} started filling in the contact form. This website can't yet tell us whether they sent it.` : 'This website can\'t yet tell us when someone sends a message.');
