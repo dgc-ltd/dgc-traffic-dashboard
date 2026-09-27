@@ -404,7 +404,7 @@
         <div class="panel-sub">Search words need a longer window than visits: most words are only typed a handful of times a year. These buttons only change the Google search section.</div>
         <div class="explain" id="termMix" style="margin-top:8px;"></div>
         <div class="table-wrap"><table class="data">
-          <thead><tr><th>Search words</th><th>Looking for</th><th>Page Google showed</th><th class="num">Times<br>shown</th><th class="num">Clicks</th><th class="num">Our place<br>in the list</th></tr></thead>
+          <thead><tr><th>Search words<span class="cell-sub">and the page Google showed</span></th><th class="num">Times<br>shown</th><th class="num">Clicks</th><th class="num">Our place<br>in the list</th></tr></thead>
           <tbody id="termRows"></tbody>
         </table></div>
         <div id="termMore" style="margin-top:6px;"></div>
@@ -1378,7 +1378,7 @@ function renderSearch(def, s, days) {
   const termNote = document.getElementById('termNote');
   if (s.searchError) {
     strip.innerHTML = ''; summary.textContent = '';
-    termRows.innerHTML = `<tr><td colspan="6" class="empty-note">Couldn't load Google search data: ${esc(s.searchError)}</td></tr>`;
+    termRows.innerHTML = `<tr><td colspan="4" class="empty-note">Couldn't load Google search data: ${esc(s.searchError)}</td></tr>`;
     gPageRows.innerHTML = ''; termNote.textContent = '';
     document.getElementById('termMix').textContent = ''; document.getElementById('termMore').innerHTML = '';
     return;
@@ -1399,12 +1399,12 @@ function renderSearch(def, s, days) {
   const brand = BRAND_RE[def.id];
   const isBrand = (t) => !!(brand && brand.test(t.key));
   const pagePath = (u) => { const p = (u || '').replace(/^https?:\/\/[^/]+/, '') || '/'; return p === '/' ? 'Home page' : p; };
-  const termRow = (t) => `<tr><td>${esc(t.key)}</td><td>${isBrand(t) ? '<span class="pill">Our name</span>' : 'A service or topic'}</td><td>${t.page ? esc(pagePath(t.page)) : '<span class="muted">—</span>'}</td><td class="num">${t.shown}</td><td class="num">${t.clicks > 0 ? `<span class="pill good">${t.clicks}</span>` : '0'}</td><td class="num">${t.pos.toFixed(0)}</td></tr>`;
+  const termRow = (t) => `<tr><td>${esc(t.key)}${isBrand(t) ? ' <span class="pill">our name</span>' : ''}${t.page ? `<span class="cell-sub">${esc(pagePath(t.page))}</span>` : ''}</td><td class="num">${t.shown}</td><td class="num">${t.clicks > 0 ? `<span class="pill good">${t.clicks}</span>` : '0'}</td><td class="num">${t.pos.toFixed(0)}</td></tr>`;
   const list = showBuried ? sc.terms.concat(sc.buried) : sc.terms;
   const LIMIT = 25;
   const shownList = showAllTerms ? list : list.slice(0, LIMIT);
   termRows.innerHTML = shownList.length ? shownList.map(termRow).join('')
-    : '<tr><td colspan="6" class="empty-note">Google hasn\'t shared any search words for this period. Try a longer window with the buttons above.</td></tr>';
+    : '<tr><td colspan="4" class="empty-note">Google hasn\'t shared any search words for this period. Try a longer window with the buttons above.</td></tr>';
   const brandTerms = sc.terms.filter(isBrand), serviceTerms = sc.terms.filter(t => !isBrand(t));
   const sumShown = (a) => a.reduce((n, t) => n + t.shown, 0), sumClicks = (a) => a.reduce((n, t) => n + t.clicks, 0);
   const topService = serviceTerms.slice().sort((a, b) => b.shown - a.shown).slice(0, 3).map(t => `"${esc(t.key)}"`);
@@ -1441,7 +1441,7 @@ document.querySelectorAll('.sc-range').forEach(btn => {
     document.querySelectorAll('.sc-range').forEach(b => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
     showAllTerms = false; showBuried = false;
     const siteId = openSiteId, def = SITE_DEFS.find(d => d.id === siteId), st = siteState[siteId];
-    document.getElementById('termRows').innerHTML = '<tr><td colspan="6" class="empty-note">Fetching search words from Google…</td></tr>';
+    document.getElementById('termRows').innerHTML = '<tr><td colspan="4" class="empty-note">Fetching search words from Google…</td></tr>';
     try { st.search = await runSearchConsole(def.scUrl, SEARCH_RANGES[searchRange]); st.searchError = null; }
     catch (e) { st.searchError = e.message; }
     // Every site uses the same window, so refresh the others quietly in the background.
