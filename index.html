@@ -394,10 +394,20 @@
         <div class="summary-strip" id="searchStrip"></div>
         <div class="panel-sub" id="searchSub" style="margin-top:8px;"></div>
         <div class="panel-title" style="margin-top:14px;">What people typed into Google</div>
+        <div class="chip-bar" role="group" aria-label="Date range for search words" style="margin:6px 0 4px;">
+          <span class="chip-label">Search words from:</span>
+          <button class="chip sc-range" aria-pressed="false" data-sc="28d">Last 28 days</button>
+          <button class="chip sc-range" aria-pressed="true" data-sc="3m">3 months</button>
+          <button class="chip sc-range" aria-pressed="false" data-sc="12m">12 months</button>
+          <button class="chip sc-range" aria-pressed="false" data-sc="16m">16 months (all Google keeps)</button>
+        </div>
+        <div class="panel-sub">Search words need a longer window than visits: most words are only typed a handful of times a year. These buttons only change the Google search section.</div>
+        <div class="explain" id="termMix" style="margin-top:8px;"></div>
         <div class="table-wrap"><table class="data">
-          <thead><tr><th>Search words</th><th class="num">Times<br>shown</th><th class="num">Clicks</th><th class="num">Our place<br>in the list</th></tr></thead>
+          <thead><tr><th>Search words<span class="cell-sub">and the page Google showed</span></th><th class="num">Times<br>shown</th><th class="num">Clicks</th><th class="num">Our place<br>in the list</th></tr></thead>
           <tbody id="termRows"></tbody>
         </table></div>
+        <div id="termMore" style="margin-top:6px;"></div>
         <div class="panel-note" id="termNote"></div>
         <div class="panel-title" style="margin-top:18px;">Which of our pages Google shows</div>
         <div class="table-wrap"><table class="data">
@@ -486,6 +496,12 @@ const REQUEST_TIMEOUT_MS = 25000;
 const NO_PAGE = ['(not set)', ''];
 
 const RANGE_DAYS = { today: 1, '7d': 7, '30d': 30 };
+// Search words have their own window: Search Console keeps 16 months, and most words are rare.
+const SEARCH_RANGES = { '28d': 28, '3m': 91, '12m': 365, '16m': 480 };
+let searchRange = '3m';
+let showAllTerms = false, showBuried = false;
+// Searches that name the business itself, rather than a service it offers.
+const BRAND_RE = { dgc: /\bdgc\b|drainage (and|&) groundwork contractors/i, manx: /manx ?drain/i, silverdale: /silver ?dale/i };
 let currentRange = '7d';
 let accessToken = null;
 let tokenClient = null;
@@ -721,12 +737,19 @@ async function runSearchConsole(siteUrl, days) {
   const scDays = Math.max(days, 7);
   const url = `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`;
   const span = { startDate: utcDay(scDays - 1), endDate: utcDay(0), dataState: 'all' };
-  const [byQuery, byPage, totals] = await Promise.all([
-    postJSON(url, { ...span, dimensions: ['query'], rowLimit: 250 }),
+  const [byQuery, byPage, totals, byQueryPage] = await Promise.all([
+    postJSON(url, { ...span, dimensions: ['query'], rowLimit: 1000 }),
     postJSON(url, { ...span, dimensions: ['page'], rowLimit: 50 }),
     postJSON(url, { ...span }),
+    postJSON(url, { ...span, dimensions: ['query', 'page'], rowLimit: 5000 }).catch(() => ({ rows: [] })),
   ]);
-  const shape = (r) => ({ key: r.keys[0], clicks: r.clicks, shown: r.impressions, pos: r.position });
+  // For each search, the page Google showed most often for it.
+  const topPage = new Map();
+  for (const r of byQueryPage.rows || []) {
+    const cur = topPage.get(r.keys[0]);
+    if (!cur || r.impressions > cur.shown) topPage.set(r.keys[0], { page: r.keys[1], shown: r.impressions });
+  }
+  const shape = (r) => ({ key: r.keys[0], clicks: r.clicks, shown: r.impressions, pos: r.position, page: (topPage.get(r.keys[0]) || {}).page || '' });
   const all = (byQuery.rows || []).map(shape).sort((a, b) => b.clicks - a.clicks || b.shown - a.shown);
   // Page 4+ appearances are Google loosely matching a page to a far-off search (e.g. an Isle of Man
   // bathroom project vs "bathroom renovation ashby-de-la-zouch"); nobody scrolls that far.
@@ -734,7 +757,7 @@ async function runSearchConsole(siteUrl, days) {
   const tot = (totals.rows && totals.rows[0]) || { clicks: 0, impressions: 0, position: 0 };
   return {
     scDays,
-    terms: all.filter(isVisible).slice(0, 12),
+    terms: all.filter(isVisible),
     buried: all.filter(t => !isVisible(t)),
     termCount: all.length,
     namedClicks: all.reduce((a, t) => a + t.clicks, 0),
@@ -882,7 +905,7 @@ async function loadAllSites(isRefresh) {
         runGA4Reports(site.propertyId, days)
           .then(raw => { out.raw = raw; out.summary = summarise(site, raw, days); })
           .catch(e => { out.error = e.message; firstError = firstError || e; }),
-        runSearchConsole(site.scUrl, days)
+        runSearchConsole(site.scUrl, SEARCH_RANGES[searchRange])
           .then(sc => { out.search = sc; })
           .catch(e => { out.searchError = e.message; }),
       ]);
@@ -1357,6 +1380,7 @@ function renderSearch(def, s, days) {
     strip.innerHTML = ''; summary.textContent = '';
     termRows.innerHTML = `<tr><td colspan="4" class="empty-note">Couldn't load Google search data: ${esc(s.searchError)}</td></tr>`;
     gPageRows.innerHTML = ''; termNote.textContent = '';
+    document.getElementById('termMix').textContent = ''; document.getElementById('termMore').innerHTML = '';
     return;
   }
   const sc = s.search;
@@ -1364,18 +1388,39 @@ function renderSearch(def, s, days) {
   summary.innerHTML = sc.totalShown
     ? `<strong>In plain words:</strong> in the last ${sc.scDays} days Google showed ${esc(def.name)} to people ${plural(sc.totalShown, 'time')}. ${plural(sc.totalClicks, 'person', 'people')} clicked (${pctText(sc.totalClicks, sc.totalShown)}). On average we were number ${sc.avgPos.toFixed(0)} in the list, ${posWords(sc.avgPos)}.`
     : `<strong>In plain words:</strong> Google didn't show ${esc(def.name)} in any search results in the last ${sc.scDays} days.`;
-  document.getElementById('searchSub').textContent = `This covers the last ${sc.scDays} days${days < sc.scDays ? ' (one day is too short for search numbers to mean anything)' : ''}. It isn't affected by the "People who" buttons, because it only covers free Google results. Google reports these numbers 2 to 3 days late.`;
+  const spanWords = { 28: 'last 28 days', 91: 'last 3 months', 365: 'last 12 months', 480: 'last 16 months' }[sc.scDays] || `last ${sc.scDays} days`;
+  document.getElementById('searchSub').textContent = `This covers the ${spanWords} (pick the window with the buttons below). It isn't affected by the date buttons at the top or the "People who" buttons, because it only covers free Google results. Google reports these numbers 2 to 3 days late.`;
   strip.innerHTML = [
     sumTile('Times shown', sc.totalShown, 'we appeared in someone\'s results'),
     sumTile('Clicks', sc.totalClicks, `${pctText(sc.totalClicks, sc.totalShown)} of the times shown`),
     sumTile('Our place in the list', sc.totalShown ? sc.avgPos.toFixed(0) : '—', '1 = top of page one'),
   ].join('');
   const row = (label, t) => `<tr><td>${label}</td><td class="num">${t.shown}</td><td class="num">${t.clicks > 0 ? `<span class="pill good">${t.clicks}</span>` : '0'}</td><td class="num">${t.pos.toFixed(0)}</td></tr>`;
-  termRows.innerHTML = sc.terms.length ? sc.terms.map(t => row(esc(t.key), t)).join('')
-    : '<tr><td colspan="4" class="empty-note">Google hasn\'t shared any search words for this period.</td></tr>';
+  const brand = BRAND_RE[def.id];
+  const isBrand = (t) => !!(brand && brand.test(t.key));
+  const pagePath = (u) => { const p = (u || '').replace(/^https?:\/\/[^/]+/, '') || '/'; return p === '/' ? 'Home page' : p; };
+  const termRow = (t) => `<tr><td>${esc(t.key)}${isBrand(t) ? ' <span class="pill">our name</span>' : ''}${t.page ? `<span class="cell-sub">${esc(pagePath(t.page))}</span>` : ''}</td><td class="num">${t.shown}</td><td class="num">${t.clicks > 0 ? `<span class="pill good">${t.clicks}</span>` : '0'}</td><td class="num">${t.pos.toFixed(0)}</td></tr>`;
+  const list = showBuried ? sc.terms.concat(sc.buried) : sc.terms;
+  const LIMIT = 25;
+  const shownList = showAllTerms ? list : list.slice(0, LIMIT);
+  termRows.innerHTML = shownList.length ? shownList.map(termRow).join('')
+    : '<tr><td colspan="4" class="empty-note">Google hasn\'t shared any search words for this period. Try a longer window with the buttons above.</td></tr>';
+  const brandTerms = sc.terms.filter(isBrand), serviceTerms = sc.terms.filter(t => !isBrand(t));
+  const sumShown = (a) => a.reduce((n, t) => n + t.shown, 0), sumClicks = (a) => a.reduce((n, t) => n + t.clicks, 0);
+  const topService = serviceTerms.slice().sort((a, b) => b.shown - a.shown).slice(0, 3).map(t => `"${esc(t.key)}"`);
+  document.getElementById('termMix').innerHTML = sc.terms.length
+    ? `<strong>What this tells us:</strong> Google named ${plural(sc.terms.length, 'different search', 'different searches')} that showed us. ${plural(brandTerms.length, 'search', 'searches')} used our name (shown ${plural(sumShown(brandTerms), 'time')}, ${plural(sumClicks(brandTerms), 'click')}): those people already knew us. ${plural(serviceTerms.length, 'search', 'searches')} were people looking for a service or topic (shown ${plural(sumShown(serviceTerms), 'time')}, ${plural(sumClicks(serviceTerms), 'click')})${topService.length ? `, the most common being ${topService.join(', ')}` : ''}. Those are the new customers SEO is about.`
+    : '';
+  const more = [];
+  if (list.length > LIMIT) more.push(`<button class="chip" id="toggleAllTerms">${showAllTerms ? 'Show the top 25 only' : `Show all ${list.length} searches`}</button>`);
+  if (sc.buried.length) more.push(`<button class="chip" id="toggleBuried">${showBuried ? 'Hide the far-off matches' : `Also show ${plural(sc.buried.length, 'far-off match', 'far-off matches')} (page 4 or later)`}</button>`);
+  document.getElementById('termMore').innerHTML = more.join(' ');
+  const rerender = () => renderSearch(def, s, days);
+  document.getElementById('toggleAllTerms')?.addEventListener('click', () => { showAllTerms = !showAllTerms; rerender(); });
+  document.getElementById('toggleBuried')?.addEventListener('click', () => { showBuried = !showBuried; rerender(); });
   const hidden = Math.max(sc.totalClicks - sc.namedClicks, 0);
   const buriedText = sc.buried.length
-    ? ` We also appeared on page 4 or later (where nobody looks) for ${plural(sc.buried.length, 'other search', 'other searches')}, e.g. "${esc(sc.buried.slice(0, 2).map(t => t.key).join('", "'))}". That's Google loosely matching a page, not real interest, so they're left out.`
+    ? ` We also appeared on page 4 or later (where nobody looks) for ${plural(sc.buried.length, 'other search', 'other searches')}, e.g. "${esc(sc.buried.slice(0, 2).map(t => t.key).join('", "'))}". That's Google loosely matching a page, not real interest, so they're left out unless you press "Also show".`
     : '';
   termNote.innerHTML = (hidden > 0 ? `<strong>Why the clicks don't add up:</strong> Google keeps the words private for searches that only a few people typed. ${plural(hidden, 'click')} of ${sc.totalClicks} came from searches Google won't name. The pages list below includes them.` : '') + buriedText;
   gPageRows.innerHTML = sc.pages.length
@@ -1389,6 +1434,23 @@ function renderSearch(def, s, days) {
 // ---------------------------------------------------------------------------
 // Controls
 // ---------------------------------------------------------------------------
+document.querySelectorAll('.sc-range').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    if (btn.getAttribute('aria-pressed') === 'true' || !openSiteId) return;
+    searchRange = btn.dataset.sc;
+    document.querySelectorAll('.sc-range').forEach(b => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+    showAllTerms = false; showBuried = false;
+    const siteId = openSiteId, def = SITE_DEFS.find(d => d.id === siteId), st = siteState[siteId];
+    document.getElementById('termRows').innerHTML = '<tr><td colspan="4" class="empty-note">Fetching search words from Google…</td></tr>';
+    try { st.search = await runSearchConsole(def.scUrl, SEARCH_RANGES[searchRange]); st.searchError = null; }
+    catch (e) { st.searchError = e.message; }
+    // Every site uses the same window, so refresh the others quietly in the background.
+    SITE_DEFS.filter(d => d.id !== siteId).forEach(d => runSearchConsole(d.scUrl, SEARCH_RANGES[searchRange])
+      .then(sc => { if (siteState[d.id]) { siteState[d.id].search = sc; siteState[d.id].searchError = null; } }).catch(() => {}));
+    if (openSiteId === siteId) openDetail(siteId, false);
+  });
+});
+
 document.getElementById('closeDetail').addEventListener('click', () => {
   openSiteId = null;
   document.getElementById('detailPanel').classList.remove('open');
