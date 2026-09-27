@@ -352,6 +352,11 @@
         <ul class="query-list" id="enquiryList"></ul>
       </div>
       <div class="section">
+        <div class="panel-title">Taps and buttons</div>
+        <div class="panel-sub">Who tapped the phone number or email address, and which buttons people pressed, and on which page. Recorded from 27 Sep 2026.</div>
+        <ul class="query-list" id="tapList"></ul>
+      </div>
+      <div class="section">
         <div class="panel-title">Where people are</div>
         <div class="panel-sub">Isle of Man towns first, then other countries. Visits from abroad with no real people are nearly always robots.</div>
         <ul class="query-list" id="countryList"></ul>
@@ -439,9 +444,7 @@ const SITE_DEFS = [
     testDays: ['20260917', '20260922', '20260924'], notTracked: [] },
 ];
 const NOT_TRACKED_ALL = [
-  'When someone taps the phone number or email address.',
-  'Which buttons people press inside the site (only links to other websites are recorded).',
-  'Each visitor\'s exact route through the site, page by page in order. This needs Google\'s free "BigQuery" link switched on.',
+  'Each visitor\'s exact route through the site, page by page in order. Google started saving this for all three sites on 27 Sep 2026 (the free "BigQuery" link); it will appear here once a few days have built up.',
   'Who a visitor is or which company they work for. Google doesn\'t provide this, and data-protection law wouldn\'t allow it.',
 ];
 
@@ -470,7 +473,12 @@ const EVENT_LABELS = {
   ads_conversion_Contact_Page_load_https_1: 'Opened the contact page (didn\'t necessarily send anything)',
   ads_conversion_Contact_Us_1: 'Google Ads "Contact Us" goal',
   form_start: 'Started filling in the contact form',
+  phone_tap: 'Tapped the phone number',
+  email_tap: 'Tapped the email address',
 };
+// Recorded by a small script on each website from 27 Sep 2026 (phone and email taps, and button presses).
+const TAP_EVENTS = ['phone_tap', 'email_tap', 'button_press'];
+const TAPS_FROM = '20260927';
 const CONTACT_EVENTS = Object.keys(EVENT_LABELS);
 const STALE_AFTER_DAYS = 3;
 const BURIED_POSITION = 30;
@@ -649,7 +657,7 @@ async function runGA4Reports(propertyId, days) {
   const visitMets = ['sessions', 'engagedSessions', 'userEngagementDuration', 'screenPageViews', 'newUsers'];
   const visitKeys = ['sessions', 'engaged', 'eng', 'views', 'newU'];
 
-  const [a, b, c, live] = await Promise.all([
+  const [a, b, c, live, tapRep] = await Promise.all([
     postJSON(`${base}:batchRunReports`, { requests: [
       // Visitor groups: fine-grained enough that a zero-screen-time robot or background tab
       // forms its own group, so it can be excluded from "real" visits (see realOf).
@@ -672,6 +680,8 @@ async function runGA4Reports(propertyId, days) {
       q([CH, 'pagePath', 'date'], ['screenPageViews'], { limit: 10000 }),
     ] }).then(d => d.reports),
     postJSON(`${base}:runRealtimeReport`, { metrics: [{ name: 'activeUsers' }] }).catch(() => null),
+    // Kept on its own so a problem here can't stop the rest of the page loading.
+    postJSON(`${base}:runReport`, q([CH, 'eventName', 'linkText', 'linkUrl', 'pagePath'], ['eventCount'], { dimensionFilter: inList('eventName', TAP_EVENTS) })).catch(() => null),
   ]);
 
   const inRange = new Set(Array.from({ length: days }, (_, n) => utcDay(n).replace(/-/g, '')));
@@ -694,6 +704,7 @@ async function runGA4Reports(propertyId, days) {
     pageDates:   toObjects(c[2], ['ch', 'path', 'date'], ['n']),
     lastDataDate: lastRow ? lastRow.dimensionValues[0].value : null,
     liveNow: live && live.rows && live.rows.length ? Number(live.rows[0].metricValues[0].value) : 0,
+    taps: tapRep ? toObjects(tapRep, ['ch', 'name', 'text', 'url', 'path'], ['count']) : [],
   };
 }
 
@@ -1264,6 +1275,22 @@ function openDetail(siteId, scroll) {
     : `<li class="empty-note">Nobody used the contact form ${periodText}.</li>`) +
     (formStarts && def.messagesTracked ? `<li><span class="query-term">Started the form but didn't send it<span class="sub">${abandoned ? 'Began typing into the contact form, then left without sending.' : 'Everyone who started the form sent it.'}</span></span><span class="query-count">${abandoned}</span></li>` : '') +
     (!def.messagesTracked ? '<li class="empty-note">This website doesn\'t record whether a message was actually sent yet.</li>' : '');
+
+  // Taps and buttons
+  const taps = (raw.taps || []).filter(inSource);
+  const tapGroups = new Map();
+  for (const t of taps) {
+    const key = t.name + '|' + (t.name === 'button_press' ? t.text : t.url) + '|' + t.path;
+    const g = tapGroups.get(key) || tapGroups.set(key, { ...t, count: 0 }).get(key);
+    g.count += t.count;
+  }
+  const tapRows = [...tapGroups.values()].sort((x, y) => (x.name === 'button_press') - (y.name === 'button_press') || y.count - x.count).slice(0, 25);
+  const tapLabel = t => t.name === 'phone_tap' ? `Tapped the phone number <b>${esc(t.url.replace(/^tel:/i, ''))}</b>`
+    : t.name === 'email_tap' ? `Tapped the email address <b>${esc(t.url.replace(/^mailto:(%20)?/i, ''))}</b>`
+    : `Pressed the button "<b>${esc(t.text)}</b>"`;
+  document.getElementById('tapList').innerHTML = tapRows.length
+    ? tapRows.map(t => `<li><span class="query-term">${tapLabel(t)}<span class="sub">on ${esc(t.path || '(page unknown)')}${t.name === 'button_press' && t.url ? ` · goes to ${esc(t.url)}` : ''}</span></span><span class="query-count">${t.count}</span></li>`).join('')
+    : `<li class="empty-note">No taps or button presses ${periodText}. This only started being recorded on 27 Sep 2026.</li>`;
 
   // Where
   const geoRows = [...new Set(G.map(placeOf))].map(key => ({ key, ...stats(G.filter(g => placeOf(g) === key)) }))
