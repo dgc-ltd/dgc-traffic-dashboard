@@ -351,6 +351,11 @@
         <div class="panel-sub">What people did with the contact form, with dates.</div>
         <ul class="query-list" id="enquiryList"></ul>
       </div>
+      <div class="section" id="enquiries">
+        <div class="panel-title">Messages sent through the website form</div>
+        <div class="panel-sub">Each message someone sent, with how they found us and the page they landed on. Names and details are private, so they're in the Silverdale Canvassing app's <a href="https://dgc-groundworks.github.io/dgc-ballasalla/silverdale-canvassing/#responses" target="_blank" rel="noopener">Responses tab</a>, matched by the time. Times are UK time.</div>
+        <ul class="query-list" id="leadList"></ul>
+      </div>
       <div class="section">
         <div class="panel-title">Taps and buttons</div>
         <div class="panel-sub">Who tapped the phone number or email address, and which buttons people pressed, and on which page. Recorded from 27 Sep 2026.</div>
@@ -673,7 +678,7 @@ async function runGA4Reports(propertyId, days) {
   const visitMets = ['sessions', 'engagedSessions', 'userEngagementDuration', 'screenPageViews', 'newUsers'];
   const visitKeys = ['sessions', 'engaged', 'eng', 'views', 'newU'];
 
-  const [a, b, c, live, tapRep] = await Promise.all([
+  const [a, b, c, live, tapRep, leadRep, prop] = await Promise.all([
     postJSON(`${base}:batchRunReports`, { requests: [
       // Visitor groups: fine-grained enough that a zero-screen-time robot or background tab
       // forms its own group, so it can be excluded from "real" visits (see realOf).
@@ -698,6 +703,9 @@ async function runGA4Reports(propertyId, days) {
     postJSON(`${base}:runRealtimeReport`, { metrics: [{ name: 'activeUsers' }] }).catch(() => null),
     // Kept on its own so a problem here can't stop the rest of the page loading.
     postJSON(`${base}:runReport`, q([CH, 'eventName', 'linkText', 'linkUrl', 'pagePath'], ['eventCount'], { dimensionFilter: inList('eventName', TAP_EVENTS) })).catch(() => null),
+    // Each message sent through a form: when, how that visitor found us, where they landed (28 Sep 2026)
+    postJSON(`${base}:runReport`, q(['dateHourMinute', 'sessionSourceMedium', 'landingPagePlusQueryString', 'deviceCategory', 'city', 'eventName'], ['eventCount'], { dimensionFilter: inList('eventName', MESSAGE_EVENTS) })).catch(() => null),
+    gfetch(`https://analyticsadmin.googleapis.com/v1beta/properties/${propertyId}`).catch(() => null),
   ]);
 
   const inRange = new Set(Array.from({ length: days }, (_, n) => utcDay(n).replace(/-/g, '')));
@@ -721,6 +729,8 @@ async function runGA4Reports(propertyId, days) {
     lastDataDate: lastRow ? lastRow.dimensionValues[0].value : null,
     liveNow: live && live.rows && live.rows.length ? Number(live.rows[0].metricValues[0].value) : 0,
     taps: tapRep ? toObjects(tapRep, ['ch', 'name', 'text', 'url', 'path'], ['count']) : [],
+    leads: leadRep ? toObjects(leadRep, ['when', 'sm', 'landing', 'device', 'city', 'name'], ['count']) : [],
+    timeZone: (prop && prop.timeZone) || 'Etc/UTC',
   };
 }
 
@@ -1314,6 +1324,21 @@ function openDetail(siteId, scroll) {
   document.getElementById('tapList').innerHTML = tapRows.length
     ? tapRows.map(t => `<li><span class="query-term">${tapLabel(t)}<span class="sub">on ${esc(t.path || '(page unknown)')}${t.name === 'button_press' && t.url ? ` · goes to ${esc(t.url)}` : ''}</span></span><span class="query-count">${t.count}</span></li>`).join('')
     : `<li class="empty-note">No taps or button presses ${periodText}. This only started being recorded on 27 Sep 2026.</li>`;
+
+  // Messages sent through the form, newest first
+  const tz = raw.timeZone || 'Etc/UTC';
+  const toUk = (w) => {
+    const y = +w.slice(0, 4), mo = +w.slice(4, 6), d = +w.slice(6, 8), h = +w.slice(8, 10), mi = +w.slice(10, 12);
+    const guess = Date.UTC(y, mo - 1, d, h, mi);
+    const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(new Date(guess)).map(x => [x.type, x.value]));
+    const asTz = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute);
+    return new Date(guess - (asTz - guess)).toLocaleString('en-GB', { timeZone: 'Europe/London', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  };
+  const leads = (raw.leads || []).filter(inSource).sort((x, y) => y.when.localeCompare(x.when)).slice(0, 30);
+  const landName = p => { const x = normPage(p || ''); return x === '/' ? 'the home page' : x === '(not set)' ? 'a page left open (no landing page)' : x; };
+  document.getElementById('leadList').innerHTML = leads.length
+    ? leads.map(l => `<li><span class="query-term"><b>${esc(toUk(l.when))}</b> · ${esc(sourceName(l.sm))}<span class="sub">Landed on ${esc(landName(l.landing))} · ${esc(l.device)}${l.city && l.city !== '(not set)' ? ` · ${esc(l.city)} area` : ''}</span></span><span class="query-count">${l.count > 1 ? plural(l.count, 'message') : ''}</span></li>`).join('')
+    : `<li class="empty-note">No messages sent through the form ${periodText}.</li>`;
 
   // Where
   const geoRows = [...new Set(G.map(placeOf))].map(key => ({ key, ...stats(G.filter(g => placeOf(g) === key)) }))
